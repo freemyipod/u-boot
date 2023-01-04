@@ -1,0 +1,9 @@
+#ifndef __CONFIG_H
+#define __CONFIG_H
+
+#define CONFIG_SYS_UBOOT_BASE		CONFIG_TEXT_BASE
+#define CONFIG_SYS_INIT_RAM_ADDR	0x22000000
+// Just guessing.
+#define CONFIG_SYS_INIT_RAM_SIZE	0x00030000
+
+#endif

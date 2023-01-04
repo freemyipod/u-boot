@@ -42,7 +42,7 @@ config COUNTER_FREQUENCY
 
 config POSITION_INDEPENDENT
 	bool "Generate position-independent pre-relocation code"
-	depends on ARM64 || CPU_V7A
+	depends on ARM64 || CPU_V7A || CPU_ARM1176
 	help
 	  U-Boot expects to be linked to a specific hard-coded address, and to
 	  be loaded to and run from that address. This option lifts that
@@ -730,6 +730,14 @@ config ARCH_EXYNOS
 	imply SYS_THUMB_BUILD
 	imply CMD_DM
 	imply FAT_WRITE
+
+config ARCH_S5L87XX
+	bool "Samsung S5L87XX"
+	select CPU_ARM1176
+	select DM
+	select DM_GPIO
+	select DM_SERIAL
+	imply CMD_DM
 
 config ARCH_S5PC1XX
 	bool "Samsung S5PC1XX"
@@ -2313,6 +2321,8 @@ source "arch/arm/mach-mediatek/Kconfig"
 source "arch/arm/mach-qemu/Kconfig"
 
 source "arch/arm/mach-rockchip/Kconfig"
+
+source "arch/arm/mach-s5l87xx/Kconfig"
 
 source "arch/arm/mach-s5pc1xx/Kconfig"
 

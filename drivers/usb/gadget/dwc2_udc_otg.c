@@ -470,6 +470,13 @@ static void reconfig_usbd(struct dwc2_udc *dev)
 	int pdata_hw_ep;
 
 	debug("Resetting OTG controller\n");
+	do {
+		uTemp = readl(&reg->grstctl);
+	} while ((uTemp & CORE_SOFT_RESET) != 0);
+	do {
+		uTemp = readl(&reg->grstctl);
+	} while ((uTemp & 0x80000000) == 0);
+	debug("OTG reset done\n");
 
 	dflt_gusbcfg =
 		0<<15		/* PHY Low Power Clock sel*/
@@ -490,7 +497,11 @@ static void reconfig_usbd(struct dwc2_udc *dev)
 	if (dev->pdata->usb_gusbcfg)
 		dflt_gusbcfg = dev->pdata->usb_gusbcfg;
 
+	debug("GUSBCFG <- %08x\n", dflt_gusbcfg);
 	writel(dflt_gusbcfg, &reg->gusbcfg);
+	debug("GUSBCFG -> %08x\n", readl(&reg->gusbcfg));
+	debug("GUSBCFG -> %08x\n", readl(&reg->gusbcfg));
+	debug("GUSBCFG -> %08x\n", readl(&reg->gusbcfg));
 
 	/* 3. Put the OTG device core in the disconnected state.*/
 	uTemp = readl(&reg->dctl);
@@ -511,7 +522,11 @@ static void reconfig_usbd(struct dwc2_udc *dev)
 	mdelay(1);
 
 	/* 6. Unmask the core interrupts*/
+	debug("GINTMSK <- %08x\n", GINTMSK_INIT);
 	writel(GINTMSK_INIT, &reg->gintmsk);
+	debug("GINTMSK -> %08x\n", readl(&reg->gintmsk));
+	debug("GINTMSK -> %08x\n", readl(&reg->gintmsk));
+	debug("GINTMSK -> %08x\n", readl(&reg->gintmsk));
 
 	/* 7. Set NAK bit of EP0, EP1, EP2*/
 	writel(DEPCTL_EPDIS|DEPCTL_SNAK, &reg->out_endp[EP0_CON].doepctl);
@@ -585,7 +600,9 @@ static void reconfig_usbd(struct dwc2_udc *dev)
 	       &reg->out_endp[EP0_CON].doepctl);
 
 	/* 14. Initialize OTG Link Core.*/
+	debug("GAHBCFG <- %08x\n", GAHBCFG_INIT);
 	writel(GAHBCFG_INIT, &reg->gahbcfg);
+	debug("GAHBCFG -> %08x\n", readl(&reg->gahbcfg));
 }
 
 static void set_max_pktsize(struct dwc2_udc *dev, enum usb_device_speed speed)
@@ -934,6 +951,7 @@ int dwc2_udc_handle_interrupt(void)
 {
 	u32 intr_status = readl(&reg->gintsts);
 	u32 gintmsk = readl(&reg->gintmsk);
+	//debug("%s: %x / %x\n", __func__, intr_status, gintmsk);
 
 	if (intr_status & gintmsk)
 		return dwc2_udc_irq(1, (void *)the_controller);
@@ -1036,6 +1054,19 @@ static void dwc2_set_stm32mp1_hsotg_params(struct dwc2_plat_otg_data *p)
 		p->usb_gusbcfg |= 1 << 30; /* FDMOD: Force device mode */
 }
 
+static void dwc2_set_applenano5g_hsotg_params(struct dwc2_plat_otg_data *p)
+{
+	p->activate_stm_id_vb_detection = true;
+	p->usb_gusbcfg =
+		0 << 15		/* PHY Low Power Clock sel*/
+		| 0x5 << 10	/* USB Turnaround time (5) */
+		| 1 << 9	/* [1:HNP enable]*/
+		| 1 << 8	/* [1:SRP enable]*/
+		| 0 << 6	/* 0: high speed utmi+, 1: full speed serial*/
+		| 1<<3;	/* phy i/f  0:8bit, 1:16bit*/
+		//| 0x7 << 0;	/* FS timeout calibration**/
+}
+
 static int dwc2_udc_otg_reset_init(struct udevice *dev,
 				   struct reset_ctl_bulk *resets)
 {
@@ -1085,6 +1116,7 @@ static int dwc2_udc_otg_clk_init(struct udevice *dev,
 
 static int dwc2_udc_otg_probe(struct udevice *dev)
 {
+	debug("in dwc2_udc_otg_probe");
 	struct dwc2_plat_otg_data *plat = dev_get_plat(dev);
 	struct dwc2_priv_data *priv = dev_get_priv(dev);
 	struct dwc2_usbotg_reg *usbotg_reg =
@@ -1182,6 +1214,8 @@ static const struct udevice_id dwc2_udc_otg_ids[] = {
 	{ .compatible = "brcm,bcm2835-usb" },
 	{ .compatible = "st,stm32mp15-hsotg",
 	  .data = (ulong)dwc2_set_stm32mp1_hsotg_params },
+	{ .compatible = "apple,ipodnano5g-usb",
+	  .data = (ulong)dwc2_set_applenano5g_hsotg_params },
 	{},
 };
 

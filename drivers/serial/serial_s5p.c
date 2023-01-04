@@ -13,7 +13,7 @@
 #include <asm/global_data.h>
 #include <linux/compiler.h>
 #include <asm/io.h>
-#if !IS_ENABLED(CONFIG_ARCH_APPLE)
+#if !IS_ENABLED(CONFIG_ARCH_APPLE) && !IS_ENABLED(CONFIG_ARCH_S5L87XX)
 #include <asm/arch/clk.h>
 #endif
 #include <asm/arch/uart.h>
@@ -124,7 +124,7 @@ int s5p_serial_setbrg(struct udevice *dev, int baudrate)
 	struct s5p_uart *const uart = plat->reg;
 	u32 uclk;
 
-#if IS_ENABLED(CONFIG_CLK_EXYNOS) || IS_ENABLED(CONFIG_ARCH_APPLE)
+#if IS_ENABLED(CONFIG_CLK_EXYNOS) || IS_ENABLED(CONFIG_ARCH_APPLE) || IS_ENABLED(CONFIG_ARCH_S5L87XX)
 	struct clk clk;
 	int ret;
 
@@ -132,6 +132,8 @@ int s5p_serial_setbrg(struct udevice *dev, int baudrate)
 	if (ret < 0)
 		return ret;
 	uclk = clk_get_rate(&clk);
+	// TODO(q3k): unhack this
+	uclk = 140000000;
 #else
 	uclk = get_uart_clk(plat->port_id);
 #endif

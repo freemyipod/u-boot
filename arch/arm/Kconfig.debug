@@ -14,6 +14,7 @@ choice
 
 	config DEBUG_LL_UART_8250
 		bool "Low-level debugging via 8250 UART"
+        depends on !ARCH_S5L87XX
 		help
 		  Say Y here if you wish the debug print routes to direct
 		  their output to an 8250 UART.  You can use this option
@@ -25,12 +26,17 @@ choice
 		  options; the platform specific options are deprecated
 		  and will be soon removed.
 
+    config DEBUG_LL_UART_S5L87XX
+        bool "Low-level debugging via S5L87xx UART"
+        depends on ARCH_S5L87XX
+
 endchoice
 
 config DEBUG_LL_INCLUDE
 	string
 	depends on DEBUG_LL
 	default "debug/8250.S" if DEBUG_LL_UART_8250 || DEBUG_UART_8250
+    default "debug/S5L87XX.S" if DEBUG_LL_UART_S5L87XX
 	default "mach/debug-macro.S"
 
 # Compatibility options for 8250

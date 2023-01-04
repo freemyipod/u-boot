@@ -1,0 +1,59 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Samsung's Exynos4 SoC common device tree source
+ *
+ * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ *		http://www.samsung.com
+ */
+
+ /dts-v1/;
+
+#include "skeleton.dtsi"
+
+/ {
+	model = "Apple iPod Nano 5G";
+	compatible = "samsung,s5l87xx";
+
+	memory {
+        device_type = "memory";
+        reg = <0x08000000 0x04000000>;
+    };
+
+
+	aliases {
+		serial0 = "/serial@3cc00000";
+		console = "/serial@3cc00000";
+	};
+
+	chosen {
+        stdout-path = "serial0:115200n8";
+    };
+
+    clkref: clock-ref {
+        compatible = "fixed-clock";
+        #clock-cells = <0>;
+        clock-frequency = <140000000>;
+        clock-output-names = "clkref";
+		u-boot,dm-pre-reloc;
+    };
+
+	serial@3cc00000 {
+		compatible = "apple,s5l-uart";
+		reg = <0x3cc00000 0x3c>;
+		id = <0>;
+		clocks = <&clkref>, <&clkref>;
+		clock-names = "uart", "clk_uart_baud0";
+		u-boot,dm-pre-reloc;
+	};
+
+	usbotg_hs: usb@38400000 {
+		compatible = "apple,ipodnano5g-usb";
+		reg = <0x38400000 0x40000>;
+		/*interrupts = <77>;*/
+		clocks = <&clkref>;
+		clock-names = "otg";
+		status = "okay";
+		dr_mode = "peripheral";
+	};
+
+};

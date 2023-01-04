@@ -1,0 +1,17 @@
+if ARCH_S5L87XX
+
+choice
+    prompt "S5L87XX board select"
+    optional
+
+config TARGET_NANO5G
+    bool "Apple iPod Nano 5G"
+
+endchoice
+
+config SYS_SOC
+    default "s5l87xx"
+
+source "board/apple/nano5g/Kconfig"
+
+endif

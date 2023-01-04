@@ -1,0 +1,12 @@
+if TARGET_NANO5G
+
+config SYS_BOARD
+    default "nano5g"
+
+config SYS_VENDOR
+    default "apple"
+
+config SYS_CONFIG_NAME
+    default "applenano5g"
+
+endif
