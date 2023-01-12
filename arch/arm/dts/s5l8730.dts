@@ -29,6 +29,27 @@
         stdout-path = "serial0:115200n8";
     };
 
+    vic0: interrupt-controller@38e00000 {
+        compatible = "arm,pl192-vic";
+        interrupt-controller;
+        reg = <0x38e00000 0x1000>;
+        #interrupt-cells = <1>;
+    };
+
+    vic1: interrupt-controller@38e01000 {
+        compatible = "arm,pl192-vic";
+        interrupt-controller;
+        reg = <0x38e01000 0x1000>;
+        #interrupt-cells = <1>;
+    };
+
+    timer0: timer@3c7000c0 {
+        compatible = "samsung,s5l87xx-pwm";
+        reg = <0x3c700000 0x20000>;
+        interrupt-parent = <&vic0>;
+        interrupts = <7>;
+    };
+
     clkref: clock-ref {
         compatible = "fixed-clock";
         #clock-cells = <0>;
@@ -44,6 +65,8 @@
 		clocks = <&clkref>, <&clkref>;
 		clock-names = "uart", "clk_uart_baud0";
 		u-boot,dm-pre-reloc;
+        interrupt-parent = <&vic0>;
+        interrupts = <24>;
 	};
 
 	usbotg_hs: usb@38400000 {
