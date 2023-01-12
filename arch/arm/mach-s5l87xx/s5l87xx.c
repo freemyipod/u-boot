@@ -252,6 +252,7 @@ static const char* s5l87xx_timer_clockgate(enum s5l87xx_timer_id id) {
 static void s5l87xx_timer_configure_interval(enum s5l87xx_timer_id id) {
     debug("s5l87xx_timer: configuring %d in interval mode\n", id);
     s5l87xx_enable_clkgate(s5l87xx_timer_clockgate(id));
+
     volatile struct s5l87xx_timer *timer = s5l87xx_timer_registers(id);
 
     timer->cmd = S5L87XX_TIMER_CMD_STOP;
@@ -295,6 +296,11 @@ unsigned long timer_read_counter(void)
 int board_early_init_f(void)
 {
     debug("board_early_init_f\n");
+    // HACKHACKHACK add a pmctrl to linux
+    // needed for timer c0..???
+    s5l87xx_enable_clkgate("timer3");
+    // HACKHACKHACK
+
     // Disable all VIC interrupts.
     // TODO(q3k): disable VIC elsewhere
     static volatile uint32_t *vic0_enclr = (uint32_t *)0x38e00014;
