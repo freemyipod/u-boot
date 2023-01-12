@@ -131,6 +131,100 @@ struct s5l87xx_buscon {
     uint32_t remap;
 };
 
+struct s5l87xx_lcdcon {
+    uint32_t con;    // 0x00
+    uint32_t cmd;    // 0x04
+    uint32_t unk1;   // 0x08
+    uint32_t unk2;   // 0x0C
+    uint32_t ack;    // 0x10
+    uint32_t read;   // 0x14
+    uint32_t unk3;   // 0x18
+    uint32_t status; // 0x1C
+    uint32_t unk[8]; // 0x20
+    uint32_t write;  // 0x40
+};
+
+#define S5L87XX_LCDCON ((volatile struct s5l87xx_lcdcon *)0x38300000)
+
+static void s5l87xx_lcdcon_read_byte(uint8_t *out) {
+    udelay(100);
+    writel(0, &S5L87XX_LCDCON->ack);
+
+    uint32_t status;
+    do {
+        status = readl(&S5L87XX_LCDCON->status);
+    } while((status & 1) == 0);
+
+    udelay(100);
+
+    uint32_t data = readl(&S5L87XX_LCDCON->read);
+    if (out != NULL) {
+        *out = (data >> 1);
+    }
+}
+
+static void s5l87xx_lcdcon_wait_ready() {
+    debug("%s: start...\n", __func__);
+    uint32_t status;
+    do {
+        status = readl(&S5L87XX_LCDCON->status);
+    } while((status & (1<<4)) != 0);
+    debug("%s: done.\n", __func__);
+}
+
+static void s5l87xx_lcdcon_transact_read(uint32_t cmd, uint32_t len, uint8_t *out) {
+    writel(0x1000c20, &S5L87XX_LCDCON->con);
+    s5l87xx_lcdcon_wait_ready();
+    writel(cmd, &S5L87XX_LCDCON->cmd);
+
+    // Discard first byte???
+    s5l87xx_lcdcon_read_byte(out);
+
+    for (uint32_t i = 0; i < len; i++) {
+        s5l87xx_lcdcon_read_byte(out);
+        debug("%s: out: %02x\n", __func__, *out);
+        out++;
+    }
+}
+
+enum s5l87xx_lcd_type {
+    S5L87XX_LCD_TYPE_UNSUPPORTED = 0,
+    S5L87XX_LCD_TYPE_48C4 = 1,
+    S5L87XX_LCD_TYPE_38B3 = 2,
+    S5L87XX_LCD_TYPE_38F7 = 4
+};
+
+static enum s5l87xx_lcd_type s5l87xx_lcdcon_get_type(void) {
+    uint8_t id[3] = {0};
+    s5l87xx_lcdcon_transact_read(4, 3, id);
+    if (id[0] == 0x48 && id[1] == 0xc4) {
+        return S5L87XX_LCD_TYPE_48C4;
+    }
+    if (id[0] == 0x38) {
+        if (id[1] == 0xb3) {
+            return S5L87XX_LCD_TYPE_38B3;
+        }
+        if (id[1] == 0xf7) {
+            return S5L87XX_LCD_TYPE_38F7;
+        }
+    }
+    return S5L87XX_LCD_TYPE_UNSUPPORTED;
+}
+
+void s5l87xx_lcd_init(void) {
+    enum s5l87xx_lcd_type type = s5l87xx_lcdcon_get_type();
+    const char* types = "UNKNOWN";
+    switch (type) {
+    case S5L87XX_LCD_TYPE_48C4:
+        types = "48c4";
+    case S5L87XX_LCD_TYPE_38B3:
+        types = "38b3";
+    case S5L87XX_LCD_TYPE_38F7:
+        types = "38f7";
+    }
+    debug("%s: detected LCD type %s (%d)\n", __func__, types, type);
+}
+
 enum s5l87xx_buscon_remap {
     S5L87XX_BUSCON_REMAP_ENABLE = 1,
     S5L87XX_BUSCON_REMAP_SRAM = 2,
@@ -153,6 +247,9 @@ static void s5l87xx_otgphy_off(void) {
 }
 
 static void s5l87xx_otgphy_on(void) {
+    // TODO(q3k): lmao
+    s5l87xx_lcd_init();
+
     debug("s5l87xx_otgphy: turning on\n");
     s5l87xx_enable_clkgate("usb-otg");
     s5l87xx_enable_clkgate("usb2-phy");
