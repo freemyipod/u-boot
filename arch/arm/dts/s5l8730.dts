@@ -36,6 +36,16 @@
         stdout-path = "serial0:115200n8";
     };
 
+    chipid: chipid {
+        compatible = "samsung,s5l87xx-chipid";
+        reg = <0x3d100000 0x1000>;
+    };
+
+    syscon: syscon {
+        compatible = "samsung,s5l87xx-syscon";
+        reg = <0x3c500000 0x1000>;
+    };
+
     vic0: interrupt-controller@38e00000 {
         compatible = "arm,pl192-vic";
         interrupt-controller;
