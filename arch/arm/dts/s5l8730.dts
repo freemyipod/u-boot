@@ -12,13 +12,12 @@
 
 / {
     model = "Apple iPod Nano 5G";
-    compatible = "samsung,s5l87xx";
+    compatible = "samsung,s5l8730", "samsung,s5l87xx";
 
     cpus {
         cpu@0 {
             compatible = "arm,arm1176jzf-s";
             device_type = "cpu";
-            reg = <0>;
         };
     };
 
