@@ -60,6 +60,31 @@
         #interrupt-cells = <1>;
     };
 
+    dmac0: dma-controller@38200000 {
+        compatible = "arm,pl080", "arm,primecell";
+        reg = <0x38200000 0x1000>;
+        #dma-cells = <1>;
+        interrupt-parent = <&vic0>;
+        interrupts = <16>;
+        clocks = <&clkref>;
+        clock-names = "apb_pclk";
+    };
+
+    dmac1: dma-controller@38700000 {
+        compatible = "arm,pl080", "arm,primecell";
+        reg = <0x38700000 0x1000>;
+        #dma-cells = <1>;
+        interrupt-parent = <&vic0>;
+        interrupts = <17>;
+        clocks = <&clkref>;
+        clock-names = "apb_pclk";
+    };
+
+    lcdcon: lcdcon@38300000 {
+        compatible = "samsung,s5l8730-lcdcon";
+        reg = <0x38300000 0x10000>;
+    };
+
     timer0: timer@3c7000c0 {
         compatible = "samsung,s5l87xx-pwm";
         reg = <0x3c700000 0x20000>;
@@ -84,6 +109,15 @@
         u-boot,dm-pre-reloc;
         interrupt-parent = <&vic0>;
         interrupts = <24>;
+    };
+
+    i2c0@3c600000 {
+        compatible = "samsung,s5l8730-i2c";
+        reg = <0x3c600000 0x1000>;
+        samsung,i2c-slave-addr = <0x40>;
+        interrupt-parent = <&vic0>;
+        interrupts = <21>;
+        status = "okay";
     };
 
     usbphy: usbphy@3c400000 {
