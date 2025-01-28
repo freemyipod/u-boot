@@ -473,6 +473,12 @@ static void reconfig_usbd(struct dwc2_udc *dev)
 	dwc2_core_reset(reg);
 
 	debug("Resetting OTG controller\n");
+	do {
+		uTemp = readl(&reg->grstctl);
+	} while ((uTemp & CORE_SOFT_RESET) != 0);
+	do {
+		uTemp = readl(&reg->grstctl);
+	} while ((uTemp & 0x80000000) == 0);
 
 	dflt_gusbcfg =
 		0<<15		/* PHY Low Power Clock sel*/
@@ -1030,6 +1036,19 @@ static void dwc2_set_stm32mp1_hsotg_params(struct dwc2_plat_otg_data *p)
 		p->usb_gusbcfg |= 1 << 30; /* FDMOD: Force device mode */
 }
 
+static void dwc2_set_s5l87xx_hsotg_params(struct dwc2_plat_otg_data *p)
+{
+	p->activate_stm_id_vb_detection = true;
+	p->usb_gusbcfg =
+		0 << 15		/* PHY Low Power Clock sel*/
+		| 0x5 << 10	/* USB Turnaround time (5) */
+		| 1 << 9	/* [1:HNP enable]*/
+		| 1 << 8	/* [1:SRP enable]*/
+		| 0 << 6	/* 0: high speed utmi+, 1: full speed serial*/
+		| 1<<3;	/* phy i/f  0:8bit, 1:16bit*/
+		//| 0x7 << 0;	/* FS timeout calibration**/
+}
+
 static int dwc2_udc_otg_reset_init(struct udevice *dev,
 				   struct reset_ctl_bulk *resets)
 {
@@ -1177,6 +1196,8 @@ static const struct udevice_id dwc2_udc_otg_ids[] = {
 	{ .compatible = "brcm,bcm2835-usb" },
 	{ .compatible = "st,stm32mp15-hsotg",
 	  .data = (ulong)dwc2_set_stm32mp1_hsotg_params },
+	{ .compatible = "apple,s5l87xx-usb",
+	  .data = (ulong)dwc2_set_s5l87xx_hsotg_params },
 	{},
 };
 
