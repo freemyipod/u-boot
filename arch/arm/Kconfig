@@ -715,6 +715,12 @@ config TARGET_BCMNS3
 	  ARMv8 Cortex-A72 processors targeting a broad range of networking
 	  applications.
 
+config ARCH_S5L87XX
+	bool "Samsung S5L87XX"
+	select DM
+	select DM_SERIAL
+	imply CMD_DM
+
 config ARCH_EXYNOS
 	bool "Samsung EXYNOS"
 	select DM
@@ -2313,6 +2319,8 @@ source "arch/arm/mach-mediatek/Kconfig"
 source "arch/arm/mach-qemu/Kconfig"
 
 source "arch/arm/mach-rockchip/Kconfig"
+
+source "arch/arm/mach-s5l87xx/Kconfig"
 
 source "arch/arm/mach-s5pc1xx/Kconfig"
 

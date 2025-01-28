@@ -1,0 +1,9 @@
+#ifndef __CONFIG_S5L8740__H
+#define __CONFIG_S5L8740__H
+
+#define CONFIG_SYS_UBOOT_BASE		CONFIG_TEXT_BASE
+#define CFG_SYS_INIT_RAM_ADDR	0x22000000
+// Just guessing.
+#define CFG_SYS_INIT_RAM_SIZE	0x00030000
+
+#endif /* __CONFIG_S5L8740__H */
