@@ -41,9 +41,13 @@ static const s5l87xx_clkgate_mapping *s5l87xx_clkgate_mappings[] = {
     &(s5l87xx_clkgate_mapping) {
         .id = "timer4", .clkgate1 = { 1, 26 }, .clkgate2 = { 9, 4 },
     },
+    // clckgates don't exactly match between s5l87xx
     &(s5l87xx_clkgate_mapping) {
-        .id = "timer5", .clkgate1 = { 1, 27 }, .clkgate2 = { 9, 5 },
+        .id = "timer5", .clkgate1 = { 1, 24 }, .clkgate2 = { 9, 2 },
     },
+    // &(s5l87xx_clkgate_mapping) {
+    //     .id = "timer5", .clkgate1 = { 1, 27 }, .clkgate2 = { 9, 5 },
+    // },
     &(s5l87xx_clkgate_mapping) {
         .id = "timer6", .clkgate1 = { 1, 28 }, .clkgate2 = { 9, 6 },
     },
@@ -79,7 +83,7 @@ static void s5l87xx_enable_clkgate(const char *id) {
             continue;
         }
 
-        debug("s5l87xx: ungating %s\n", id);
+        log_debug("s5l87xx: ungating %s\n", id);
         s5l87xx_enable_clkgate_bit(m->clkgate1.gate, m->clkgate1.bit);
         if ((m->clkgate2.gate != 0) && (m->clkgate2.bit != 0)) {
             s5l87xx_enable_clkgate_bit(m->clkgate2.gate, m->clkgate2.bit);
@@ -222,7 +226,7 @@ void s5l87xx_lcd_init(void) {
     case S5L87XX_LCD_TYPE_38F7:
         types = "38f7";
     }
-    debug("%s: detected LCD type %s (%d)\n", __func__, types, type);
+    log_debug("%s: detected LCD type %s (%d)\n", __func__, types, type);
 }
 
 enum s5l87xx_buscon_remap {
@@ -231,13 +235,13 @@ enum s5l87xx_buscon_remap {
 };
 
 static void s5l87xx_buscon_remap_sdram(void) {
-    debug("s5l87xx_buscon_remap_sdram\n");
+    log_debug("s5l87xx_buscon_remap_sdram\n");
     volatile struct s5l87xx_buscon *buscon = (struct s5l87xx_buscon *)0x3E000000;
     buscon->remap = S5L87XX_BUSCON_REMAP_ENABLE;
 }
 
 static void s5l87xx_otgphy_off(void) {
-    debug("s5l87xx_otgphy: turning off\n");
+    log_debug("s5l87xx_otgphy: turning off\n");
     volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)0x3c400000;
     otgphy->pwr = 0xff;
     mdelay(10);
@@ -250,7 +254,7 @@ static void s5l87xx_otgphy_on(void) {
     // TODO(q3k): lmao
     s5l87xx_lcd_init();
 
-    debug("s5l87xx_otgphy: turning on\n");
+    log_debug("s5l87xx_otgphy: turning on\n");
     s5l87xx_enable_clkgate("usb-otg");
     s5l87xx_enable_clkgate("usb2-phy");
     mdelay(10);
@@ -347,8 +351,7 @@ static const char* s5l87xx_timer_clockgate(enum s5l87xx_timer_id id) {
 }
 
 static void s5l87xx_timer_configure_interval(enum s5l87xx_timer_id id) {
-    return 0;
-    debug("s5l87xx_timer: configuring %d in interval mode\n", id);
+    log_debug("s5l87xx_timer: configuring %d in interval mode\n", id);
     s5l87xx_enable_clkgate(s5l87xx_timer_clockgate(id));
 
     volatile struct s5l87xx_timer *timer = s5l87xx_timer_registers(id);
@@ -361,13 +364,13 @@ static void s5l87xx_timer_configure_interval(enum s5l87xx_timer_id id) {
 }
 
 static void s5l87xx_timer_start(enum s5l87xx_timer_id id) {
-    debug("s5l87xx_timer: starting %d\n", id);
+    log_debug("s5l87xx_timer: starting %d\n", id);
     volatile struct s5l87xx_timer *timer = s5l87xx_timer_registers(id);
     timer->cmd = S5L87XX_TIMER_CMD_START;
 }
 
 static void s5l87xx_timer_stop(enum s5l87xx_timer_id id) {
-    debug("s5l87xx_timer: stopping %d\n", id);
+    log_debug("s5l87xx_timer: stopping %d\n", id);
     volatile struct s5l87xx_timer *timer = s5l87xx_timer_registers(id);
     timer->cmd = S5L87XX_TIMER_CMD_STOP;
 }
