@@ -15,6 +15,7 @@
 #include <init.h>
 #include <k3-ddrss.h>
 #include <spl.h>
+#include <asm/arch/k3-ddr.h>
 
 #include "../common/tdx-cfg-block.h"
 
@@ -33,6 +34,20 @@ int dram_init(void)
 		puts("## WARNING: Less than 512MB RAM detected\n");
 
 	return 0;
+}
+
+int dram_init_banksize(void)
+{
+	s32 ret;
+
+	ret = fdtdec_setup_memory_banksize();
+	if (ret)
+		printf("Error setting up memory banksize. %d\n", ret);
+
+	/* Use the detected RAM size, we only support 1 bank right now. */
+	gd->bd->bi_dram[0].size = gd->ram_size;
+
+	return ret;
 }
 
 /*
@@ -96,6 +111,13 @@ int board_late_init(void)
 #define CTRLMMR_USB1_PHY_CTRL		0x43004018
 #define CORE_VOLTAGE			0x80000000
 #define MCU_CTRL_LFXOSC_32K_BYPASS_VAL	BIT(4)
+
+#if IS_ENABLED(CONFIG_XPL_BUILD)
+void spl_perform_fixups(struct spl_image_info *spl_image)
+{
+	fixup_memory_node(spl_image);
+}
+#endif
 
 #ifdef CONFIG_SPL_BOARD_INIT
 void spl_board_init(void)

@@ -52,9 +52,6 @@ dtb-$(CONFIG_MACH_S900) += \
 dtb-$(CONFIG_MACH_S700) += \
 	s700-cubieboard7.dtb
 
-dtb-$(CONFIG_ROCKCHIP_RK3036) += \
-	rk3036-sdk.dtb
-
 dtb-$(CONFIG_ROCKCHIP_RK3128) += \
 	rk3128-evb.dtb
 
@@ -84,6 +81,7 @@ dtb-$(CONFIG_ARCH_MESON) += \
 	meson-a1-ad401.dtb
 
 dtb-$(CONFIG_ARCH_TEGRA) += \
+	tegra20-acer-a500-picasso.dtb \
 	tegra20-asus-sl101.dtb \
 	tegra20-asus-tf101.dtb \
 	tegra20-asus-tf101g.dtb \
@@ -1225,6 +1223,8 @@ dtb-$(CONFIG_ARCH_QEMU) += qemu-arm.dtb qemu-arm64.dtb
 
 dtb-$(CONFIG_TARGET_CORSTONE1000) += corstone1000-mps3.dtb \
 				corstone1000-fvp.dtb
+
+dtb-$(CONFIG_TARGET_COREPRIMEVELTE) += pxa1908-samsung-coreprimevelte.dtb
 
 include $(srctree)/scripts/Makefile.dts
 
