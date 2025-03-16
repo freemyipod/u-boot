@@ -1,19 +1,32 @@
 // SPDX-License-Identifier: GPL-2.0+
-
+/*
+ * Apple S5L8740 SoC
+ *
+ * Other Names: N31
+ */
 /dts-v1/;
-#include "skeleton.dtsi"
 
 / {
-    model = "Apple N31";
-    compatible = "samsung,s5l8740", "samsung,s5l87xx";
+    #address-cells = <1>;
+	#size-cells = <1>;
+    model = "Apple iPod Nano (7th Geneneration)";
+    compatible = "apple,n31", "samsung,s5l8740";
+
+    clkref: clock-ref {
+        compatible = "fixed-clock";
+        #clock-cells = <0>;
+        clock-frequency = <24000000>;
+        clock-output-names = "clkref";
+    };
 
     cpus {
         #address-cells = <1>;
 		#size-cells = <0>;
+        
         cpu@0 {
 			device_type = "cpu";
-			compatible = "arm,cortex-a5";
             reg = <0>;
+			compatible = "arm,cortex-a5";
 		};
     };
 
@@ -22,21 +35,40 @@
         reg = <0x08000000 0x04000000>;
     };
 
+    aliases {
+		serial0 = &uart3;
+	};
+
     chosen {
-        stdout-path = &uart3;
+        stdout-path = "serial0";
+        bootargs = "earlyprintk console=ttyS0";
+    };
+
+    vic0: interrupt-controller@38e00000 {
+        compatible = "arm,pl192-vic";
+        interrupt-controller;
+        reg = <0x38e00000 0x1000>;
+        #interrupt-cells = <1>;
+    };
+
+    vic1: interrupt-controller@38e01000 {
+        compatible = "arm,pl192-vic";
+        interrupt-controller;
+        reg = <0x38e01000 0x1000>;
+        #interrupt-cells = <1>;
+    };
+
+    timer0: timer@3c7000c0 {
+        compatible = "samsung,s5l87xx-pwm";
+        reg = <0x3c700000 0x20000>;
+        interrupt-parent = <&vic0>;
+        interrupts = <7>;
     };
 
     soc {
         compatible = "simple-bus";
         #address-cells = <1>;
 		#size-cells = <1>;
-
-        clkref: clock-ref {
-            compatible = "fixed-clock";
-            #clock-cells = <0>;
-            clock-frequency = <24000000>;
-            clock-output-names = "clkref";
-        };
 
         uart3: uart3@3dd00000 {
             compatible = "apple,s5l-uart";
@@ -46,7 +78,16 @@
             clock-names = "uart", "clk_uart_baud0";
             reg-io-width = <4>;
             status = "okay";
-            bootph-all;
+        };
+
+        usbotg_hs: usb@38400000 {
+		    compatible = "apple,s5l8702-usb";
+		    reg = <0x38400000 0x40000>;
+		    /*interrupts = <77>;*/
+		    clocks = <&clkref>;
+		    clock-names = "otg";
+		    status = "okay";
+		    dr_mode = "peripheral";
         };
     };
 };

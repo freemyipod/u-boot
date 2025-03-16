@@ -1,4 +1,5 @@
 #include <asm/global_data.h>
+#include <asm/io.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -18,8 +19,18 @@ int board_init(void)
 	return 0;
 }
 
+#define rWDTCON 0x3C800000
+#define rSWRCON 0x3C500050
 void reset_cpu(void)
 {
+    // According to S5L8700X datasheet
+    // rSWRCON = 0xA5 triggers a Software Reset
+    // rWDTCON = 0x100000 is not documented but might trigger a Watchdog Reset
+	// writel(0x100000, rWDTCON);
+    // writel(0xA5, rSWRCON);
+
+	// while (1)
+	// 	;	/* loop forever till reset */
 }
 
 ulong get_tbclk(void)

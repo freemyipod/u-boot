@@ -252,12 +252,16 @@ static void s5l87xx_otgphy_off(void) {
 
 static void s5l87xx_otgphy_on(void) {
     // TODO(q3k): lmao
-    s5l87xx_lcd_init();
+    // s5l87xx_lcd_init();
 
     log_debug("s5l87xx_otgphy: turning on\n");
     s5l87xx_enable_clkgate("usb-otg");
     s5l87xx_enable_clkgate("usb2-phy");
     mdelay(10);
+
+    // Disable USB suspend. TODO(q3k): move this to DWC2?
+    volatile uint32_t *pcgcctl = (uint32_t *)0x38400e00;
+    *pcgcctl = 0;
 
     volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)0x3c400000;
     otgphy->pwr = 0;
