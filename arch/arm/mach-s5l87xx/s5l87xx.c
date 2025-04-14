@@ -49,8 +49,11 @@ static const s5l87xx_clkgate_mapping *s5l87xx_clkgate_mappings[] = {
     //     .id = "timer5", .clkgate1 = { 1, 27 }, .clkgate2 = { 9, 5 },
     // },
     &(s5l87xx_clkgate_mapping) {
-        .id = "timer6", .clkgate1 = { 1, 28 }, .clkgate2 = { 9, 6 },
+        .id = "timer6", .clkgate1 = { 1, 25 }, .clkgate2 = { 9, 3 },
     },
+    // &(s5l87xx_clkgate_mapping) {
+    //     .id = "timer6", .clkgate1 = { 1, 28 }, .clkgate2 = { 9, 6 },
+    // },
     &(s5l87xx_clkgate_mapping) {
         .id = "timer7", .clkgate1 = { 4, 5 }, .clkgate2 = { 9, 22 },
     },
@@ -386,6 +389,7 @@ static uint32_t s5l87xx_timer_read(enum s5l87xx_timer_id id) {
 
 int timer_init(void)
 {
+    // s5l87xx_enable_clkgate(s5l87xx_timer_clockgate(S5L87XX_TIMER_G));
     s5l87xx_timer_configure_interval(S5L87XX_TIMER_F);
     s5l87xx_timer_start(S5L87XX_TIMER_F);
 

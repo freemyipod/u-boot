@@ -61,7 +61,12 @@ void board_clock_init(void) {
     *(volatile int *)(0x3C50006C) &= ~(1<<10);
 }
 
-
+void enable_caches(void)
+{
+    // Caches already enabled by the bootloader
+    // just here so that we don't see
+	// WARNING: Caches not enabled\n"
+}
 
 #ifdef CONFIG_BOARD_EARLY_INIT_F
 int board_early_init_f(void)
