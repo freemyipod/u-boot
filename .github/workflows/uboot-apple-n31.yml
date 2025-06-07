@@ -1,0 +1,33 @@
+name: Build U-Boot for Apple N31
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential gcc-arm-none-eabi libgnutls28-dev
+
+      - name: Configure U-Boot
+        run: |
+          make apple_n31_defconfig
+
+      - name: Build U-Boot
+        run: |
+          make -j$(nproc) CROSS_COMPILE=arm-none-eabi-
+
+      - name: Upload U-Boot artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: u-boot-apple-n31-artifacts
+          path: |
+            u-boot*
+            dts/dt.dtb
+            System.map
