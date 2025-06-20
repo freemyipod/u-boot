@@ -5,6 +5,17 @@
 
 #include <linux/types.h>
 
+#define S5L87XX_LCDCON_ADDR    0x38300000
+#define S5L87XX_OTGBASE_ADDR   0x38400000
+#define S5L87XX_VICBASE_ADDR   0x38E00000
+#define S5L87XX_PHYBASE_ADDR   0x3C400000
+#define S5L87XX_CLKCON_ADDR    0x3C500000
+#define S5L87XX_SWRCON_ADDR    0x3C500050
+#define S5L87XX_TIMERBASE_ADDR 0x3C700000
+#define S5L87XX_WDTCON_ADDR    0x3C800000
+#define S5L87XX_GPIOBASE_ADDR  0x3CF00000
+#define S5L87XX_BUSCON_ADDR    0x3E000000
+
 void s5l87xx_reset_cpu(void);
 void s5l87xx_enable_clkgate(const char *id);
 
