@@ -1,6 +1,7 @@
 #include <init.h>
 #include <asm/io.h>
 #include <linux/delay.h>
+#include <asm/arch/s5l87xx_common.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -9,7 +10,7 @@ typedef struct {
     uint32_t gates[10];
 } s5l87xx_clkcon;
 
-#define S5L87XX_CLKCON ((volatile s5l87xx_clkcon *)0x3C500000)
+#define S5L87XX_CLKCON ((volatile s5l87xx_clkcon *)S5L87XX_CLKCON_ADDR)
 
 typedef struct {
     uint8_t gate;
@@ -73,15 +74,12 @@ static const s5l87xx_clkgate_mapping *s5l87xx_clkgate_mappings[] = {
     NULL,
 };
 
-#define rWDTCON 0x3C800000
-#define rSWRCON 0x3C500050
-
 void s5l87xx_reset_cpu(void) {
     // According to S5L8700X datasheet
     // rSWRCON = 0xA5 triggers a Software Reset
     // rWDTCON = 0x100000 is not documented but might trigger a Watchdog Reset
-    writel(0x100000, rWDTCON);
-    // writel(0xA5, rSWRCON);
+    // writel(0xA5, S5L87XX_SWRCON_ADDR);
+    writel(0x100000, S5L87XX_WDTCON_ADDR);
 
     while (1)
         ;	/* loop forever till reset */
@@ -166,7 +164,7 @@ struct s5l87xx_lcdcon {
     uint32_t write;  // 0x40
 };
 
-#define S5L87XX_LCDCON ((volatile struct s5l87xx_lcdcon *)0x38300000)
+#define S5L87XX_LCDCON ((volatile struct s5l87xx_lcdcon *)S5L87XX_LCDCON_ADDR)
 
 static void s5l87xx_lcdcon_read_byte(uint8_t *out) {
     udelay(100);
@@ -258,14 +256,14 @@ enum s5l87xx_buscon_remap {
 #if 0
 static void s5l87xx_buscon_remap_sdram(void) {
     log_debug("s5l87xx_buscon_remap_sdram\n");
-    volatile struct s5l87xx_buscon *buscon = (struct s5l87xx_buscon *)0x3E000000;
+    volatile struct s5l87xx_buscon *buscon = (struct s5l87xx_buscon *)S5L87XX_BUSCON_ADDR;
     buscon->remap = S5L87XX_BUSCON_REMAP_ENABLE;
 }
 #endif
 
 static void s5l87xx_otgphy_off(void) {
     log_debug("s5l87xx_otgphy: turning off\n");
-    volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)0x3c400000;
+    volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)S5L87XX_PHYBASE_ADDR;
     otgphy->pwr = 0xff;
     mdelay(10);
     otgphy->rstcon = 0xff;
@@ -274,24 +272,17 @@ static void s5l87xx_otgphy_off(void) {
 }
 
 static void s5l87xx_otgphy_on(void) {
-#if IS_ENABLED(CONFIG_TARGET_N33)
-    // TODO(q3k): lmao
-    s5l87xx_lcd_init();
-#endif
-
     log_debug("s5l87xx_otgphy: turning on\n");
     s5l87xx_enable_clkgate("usb-otg");
     s5l87xx_enable_clkgate("usb2-phy");
     mdelay(10);
 
-#if IS_ENABLED(CONFIG_TARGET_N31)
     // Disable USB suspend.
     // TODO(q3k): move this to DWC2?
-    volatile uint32_t *pcgcctl = (uint32_t *)0x38400e00;
+    volatile uint32_t *pcgcctl = (uint32_t *)(S5L87XX_OTGBASE_ADDR + 0xe00);
     *pcgcctl = 0;
-#endif
     
-    volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)0x3c400000;
+    volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)S5L87XX_PHYBASE_ADDR;
     otgphy->pwr = 0;
     mdelay(10);
     otgphy->rstcon = 1;
@@ -335,23 +326,23 @@ enum s5l87xx_timer_cmd {
 static struct s5l87xx_timer *s5l87xx_timer_registers(enum s5l87xx_timer_id id) {
     switch (id) {
     case S5L87XX_TIMER_A:
-        return (struct s5l87xx_timer *)0x3c700000;
+        return (struct s5l87xx_timer *)S5L87XX_TIMERBASE_ADDR;
     case S5L87XX_TIMER_B:
-        return (struct s5l87xx_timer *)0x3c700020;
+        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0x20);
     case S5L87XX_TIMER_C:
-        return (struct s5l87xx_timer *)0x3c700040;
+        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0x40);
     case S5L87XX_TIMER_D:
-        return (struct s5l87xx_timer *)0x3c700060;
+        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0x60);
     case S5L87XX_TIMER_E:
-        return (struct s5l87xx_timer *)0x3c700080;
+        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0x80);
     case S5L87XX_TIMER_F:
-        return (struct s5l87xx_timer *)0x3c7000a0;
+        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0xa0);
     case S5L87XX_TIMER_G:
-        return (struct s5l87xx_timer *)0x3c7000c0;
+        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0xc0);
     case S5L87XX_TIMER_H:
-        return (struct s5l87xx_timer *)0x3c7000e0;
+        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0xe0);
     case S5L87XX_TIMER_I:
-        return (struct s5l87xx_timer *)0x3c700100;
+        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0x100);
     default:
         panic("requested invalid timer id %d", id);
     }
