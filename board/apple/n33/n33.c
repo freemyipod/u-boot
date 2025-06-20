@@ -50,17 +50,11 @@ int board_early_init_f(void)
 
     // Disable all VIC interrupts.
     // TODO(q3k): disable VIC elsewhere
-    static volatile uint32_t *vic0_enclr = (uint32_t *)0x38e00014;
-    static volatile uint32_t *vic1_enclr = (uint32_t *)0x38e01014;
+    static volatile uint32_t *vic0_enclr = (uint32_t *)(S5L87XX_VICBASE_ADDR + 0x14);
+    static volatile uint32_t *vic1_enclr = (uint32_t *)(S5L87XX_VICBASE_ADDR + 0x14 + 0x1000);
     *vic0_enclr = 0xffffffff;
     *vic1_enclr = 0xffffffff;
 
-    s5l87xx_enable_clkgate("usb-otg");
-    s5l87xx_enable_clkgate("usb2-phy");
-
-    // Disable USB suspend. TODO(q3k): move this to DWC2?
-    volatile uint32_t *pcgcctl = (uint32_t *)0x38400e00;
-    *pcgcctl = 0;
     return 0;
 }
 #endif
@@ -71,7 +65,7 @@ void board_debug_uart_init(void)
     s5l87xx_enable_clkgate("uart0");
 
     // Enable GPIO pins on N5G.
-    static volatile uint32_t *gpio = (uint32_t *)0x3cf00000;
+    static volatile uint32_t *gpio = (uint32_t *)S5L87XX_GPIOBASE_ADDR;
     *gpio &= 0xff00ffff;
     *gpio |= 0x00220000;
 }

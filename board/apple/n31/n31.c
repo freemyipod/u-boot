@@ -38,19 +38,19 @@ int print_cpuinfo(void)
 }
 
 void board_gpio_init(void) {
-    *(volatile int *)(0x3CF00140) |= 0x22000;
-    *(volatile int *)(0x3CF00154) |= 0x18;
+    *(volatile int *)(S5L87XX_GPIOBASE_ADDR + 0x140) |= 0x22000;
+    *(volatile int *)(S5L87XX_GPIOBASE_ADDR + 0x154) |= 0x18;
 }
 
 // UART RX line 0x02000
 // UART TX line 0x20000
 
 void board_clock_init(void) {
-    // *(volatile int *)(0x3C500048) = 0x1BA585;
-    *(volatile int *)(0x3C50004C) &= ~(1<<31); // 1<<31 UART(?)
-    // *(volatile int *)(0x3C500058) = 0x1AF1;
-    // *(volatile int *)(0x3C500068) = 0x3C0FC;
-    *(volatile int *)(0x3C50006C) &= ~(1<<10);
+    // writel(0x1BA585, S5L87XX_CLKCON_ADDR + 0x48);
+    *(volatile int *)(S5L87XX_CLKCON_ADDR + 0x4C) &= ~(1<<31); // 1<<31 UART(?)
+    // writel(0x1AF1, S5L87XX_CLKCON_ADDR + 0x58);
+    // writel(0x3C0FC, S5L87XX_CLKCON_ADDR + 0x68);
+    *(volatile int *)(S5L87XX_CLKCON_ADDR + 0x6C) &= ~(1<<10);
 }
 
 void enable_caches(void)
