@@ -3,11 +3,12 @@ if ARCH_S5L87XX
 choice
     prompt "S5L87XX board select"
 
-config TARGET_NANO5G
-    bool "Apple iPod Nano 5G"
+config TARGET_N33
+    bool "Apple N33 (iPod Nano 5G)"
+    select CPU_ARM1176
 
 config TARGET_N31
-    bool "Apple N31"
+    bool "Apple N31 (iPod Nano 7G)"
     select CPU_V7A
 
 endchoice
@@ -15,6 +16,7 @@ endchoice
 config SYS_SOC
     default "s5l87xx"
 
+source "board/apple/n33/Kconfig"
 source "board/apple/n31/Kconfig"
 
 endif

@@ -33,7 +33,11 @@ struct s5p_uart {
 
 static inline int s5p_uart_divslot(void)
 {
+#if IS_ENABLED(CONFIG_TARGET_N33)
+	return 1;
+#elif IS_ENABLED(CONFIG_TARGET_N31)
 	return 0;
+#endif
 }
 
 #endif	/* __ASSEMBLY__ */

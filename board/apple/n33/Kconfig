@@ -1,0 +1,12 @@
+if TARGET_N33
+
+config SYS_BOARD
+    default "n33"
+
+config SYS_VENDOR
+    default "apple"
+
+config SYS_CONFIG_NAME
+    default "apple_n33"
+
+endif
