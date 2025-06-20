@@ -1,0 +1,30 @@
+name: Build U-Boot for Apple N33
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/freemyipod/gcc-arm-env:main
+       
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure U-Boot
+        run: |
+          make apple_n33_defconfig
+
+      - name: Build U-Boot
+        run: |
+          make -j$(nproc) CROSS_COMPILE=arm-none-eabi-
+
+      - name: Upload U-Boot artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: u-boot-apple-n33-artifacts
+          path: |
+            u-boot*
+            dts/dt.dtb
+            System.map

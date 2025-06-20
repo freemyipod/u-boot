@@ -2,8 +2,6 @@
 #include <asm/io.h>
 #include <linux/delay.h>
 
-#define DEBUG
-
 DECLARE_GLOBAL_DATA_PTR;
 
 typedef struct {
@@ -42,7 +40,14 @@ static const s5l87xx_clkgate_mapping *s5l87xx_clkgate_mappings[] = {
         .id = "timer4", .clkgate1 = { 1, 26 }, .clkgate2 = { 9, 4 },
     },
     // clockgates don't exactly match between s5l87xx
-#if IS_ENABLED(CONFIG_TARGET_N31)
+#if IS_ENABLED(CONFIG_TARGET_N33)
+    &(s5l87xx_clkgate_mapping) {
+        .id = "timer5", .clkgate1 = { 1, 27 }, .clkgate2 = { 9, 5 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "timer6", .clkgate1 = { 1, 28 }, .clkgate2 = { 9, 6 },
+    },
+#elif IS_ENABLED(CONFIG_TARGET_N31)
     &(s5l87xx_clkgate_mapping) {
         .id = "timer5", .clkgate1 = { 1, 24 }, .clkgate2 = { 9, 2 },
     },
@@ -269,16 +274,23 @@ static void s5l87xx_otgphy_off(void) {
 }
 
 static void s5l87xx_otgphy_on(void) {
+#if IS_ENABLED(CONFIG_TARGET_N33)
+    // TODO(q3k): lmao
+    s5l87xx_lcd_init();
+#endif
+
     log_debug("s5l87xx_otgphy: turning on\n");
     s5l87xx_enable_clkgate("usb-otg");
     s5l87xx_enable_clkgate("usb2-phy");
     mdelay(10);
 
+#if IS_ENABLED(CONFIG_TARGET_N31)
     // Disable USB suspend.
     // TODO(q3k): move this to DWC2?
     volatile uint32_t *pcgcctl = (uint32_t *)0x38400e00;
     *pcgcctl = 0;
-
+#endif
+    
     volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)0x3c400000;
     otgphy->pwr = 0;
     mdelay(10);
