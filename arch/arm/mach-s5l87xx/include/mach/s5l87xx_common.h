@@ -5,16 +5,35 @@
 
 #include <linux/types.h>
 
-#define S5L87XX_LCDCON_ADDR    0x38300000
-#define S5L87XX_OTGBASE_ADDR   0x38400000
-#define S5L87XX_VICBASE_ADDR   0x38E00000
-#define S5L87XX_PHYBASE_ADDR   0x3C400000
-#define S5L87XX_CLKCON_ADDR    0x3C500000
-#define S5L87XX_SWRCON_ADDR    0x3C500050
-#define S5L87XX_TIMERBASE_ADDR 0x3C700000
-#define S5L87XX_WDTCON_ADDR    0x3C800000
-#define S5L87XX_GPIOBASE_ADDR  0x3CF00000
-#define S5L87XX_BUSCON_ADDR    0x3E000000
+#define S5L87XX_LCD_BASE 0x38300000
+
+#define S5L87XX_OTG_BASE 0x38400000
+
+#define S5L87XX_VIC_BASE         0x38E00000
+#define S5L87XX_VIC_OFFSET       0x1000
+#define S5L87XX_VICBASE(v)       (S5L87XX_VIC_BASE + S5L87XX_VIC_OFFSET * (v))
+#define S5L87XX_VICINTENCLEAR(v) (S5L87XX_VICBASE(v) + 0x14)
+
+#define S5L87XX_PHY_BASE 0x3C400000
+
+#define S5L87XX_CLK_BASE  0x3C500000
+#define S5L87XX_SWRCON    (S5L87XX_CLK_BASE + 0x50)
+#define S5L87XX_PWRCON(i) (S5L87XX_CLK_BASE \
+                                + ((i) == 4 ? 0x6C : \
+                                  ((i) == 3 ? 0x68 : \
+                                  ((i) == 2 ? 0x58 : \
+                                  ((i) == 1 ? 0x4C : \
+                                              0x48)))))
+
+#define S5L87XX_TIMER_BASE 0x3C700000
+
+#define S5L87XX_WDT_BASE 0x3C800000
+#define S5L87XX_WDTCON   S5L87XX_WDT_BASE
+
+#define S5L87XX_GPIO_BASE 0x3CF00000
+#define S5L87XX_PCON0     S5L87XX_GPIO_BASE
+
+#define S5L87XX_BUS_BASE 0x3E000000
 
 void s5l87xx_reset_cpu(void);
 void s5l87xx_enable_clkgate(const char *id);

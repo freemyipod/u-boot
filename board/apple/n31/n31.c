@@ -16,7 +16,6 @@ int dram_init_banksize(void)
 
 int board_init(void)
 {
-
 	return 0;
 }
 
@@ -38,19 +37,35 @@ int print_cpuinfo(void)
 }
 
 void board_gpio_init(void) {
-    *(volatile int *)(S5L87XX_GPIOBASE_ADDR + 0x140) |= 0x22000;
-    *(volatile int *)(S5L87XX_GPIOBASE_ADDR + 0x154) |= 0x18;
+    uint32_t value;
+
+    value = readl(S5L87XX_GPIO_BASE + 0x140);
+    value |= 0x22000;
+    writel(value, S5L87XX_GPIO_BASE + 0x140);
+    
+    value = readl(S5L87XX_GPIO_BASE + 0x154);
+    value |= 0x18;
+    writel(value, S5L87XX_GPIO_BASE + 0x154);
 }
 
 // UART RX line 0x02000
 // UART TX line 0x20000
 
 void board_clock_init(void) {
-    // writel(0x1BA585, S5L87XX_CLKCON_ADDR + 0x48);
-    *(volatile int *)(S5L87XX_CLKCON_ADDR + 0x4C) &= ~(1<<31); // 1<<31 UART(?)
-    // writel(0x1AF1, S5L87XX_CLKCON_ADDR + 0x58);
-    // writel(0x3C0FC, S5L87XX_CLKCON_ADDR + 0x68);
-    *(volatile int *)(S5L87XX_CLKCON_ADDR + 0x6C) &= ~(1<<10);
+    uint32_t value;
+
+    // writel(0x1BA585, S5L87XX_PWRCON(0));
+    
+    value = readl(S5L87XX_PWRCON(1));
+    value &= ~(1<<31); // 1<<31 UART(?)
+    writel(value, S5L87XX_PWRCON(1));
+
+    // writel(0x1AF1, S5L87XX_PWRCON(2));
+    // writel(0x3C0FC, S5L87XX_PWRCON(3));
+
+    value = readl(S5L87XX_PWRCON(4));
+    value &= ~(1<<10);
+    writel(value, S5L87XX_PWRCON(4));
 }
 
 void enable_caches(void)
