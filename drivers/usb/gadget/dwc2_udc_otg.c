@@ -473,12 +473,6 @@ static void reconfig_usbd(struct dwc2_udc *dev)
 	dwc2_core_reset(reg);
 
 	debug("Resetting OTG controller\n");
-	do {
-		uTemp = readl(&reg->grstctl);
-	} while ((uTemp & CORE_SOFT_RESET) != 0);
-	do {
-		uTemp = readl(&reg->grstctl);
-	} while ((uTemp & 0x80000000) == 0);
 
 	dflt_gusbcfg =
 		0<<15		/* PHY Low Power Clock sel*/
