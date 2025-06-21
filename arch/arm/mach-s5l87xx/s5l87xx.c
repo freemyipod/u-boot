@@ -10,7 +10,7 @@ typedef struct {
     uint32_t gates[10];
 } s5l87xx_clkcon;
 
-#define S5L87XX_CLKCON ((volatile s5l87xx_clkcon *)S5L87XX_CLKCON_ADDR)
+#define S5L87XX_CLKCON ((volatile s5l87xx_clkcon *)S5L87XX_CLK_BASE)
 
 typedef struct {
     uint8_t gate;
@@ -78,8 +78,8 @@ void s5l87xx_reset_cpu(void) {
     // According to S5L8700X datasheet
     // rSWRCON = 0xA5 triggers a Software Reset
     // rWDTCON = 0x100000 is not documented but might trigger a Watchdog Reset
-    // writel(0xA5, S5L87XX_SWRCON_ADDR);
-    writel(0x100000, S5L87XX_WDTCON_ADDR);
+    // writel(0xA5, S5L87XX_SWRCON);
+    writel(0x100000, S5L87XX_WDTCON);
 
     while (1)
         ;	/* loop forever till reset */
@@ -164,7 +164,7 @@ struct s5l87xx_lcdcon {
     uint32_t write;  // 0x40
 };
 
-#define S5L87XX_LCDCON ((volatile struct s5l87xx_lcdcon *)S5L87XX_LCDCON_ADDR)
+#define S5L87XX_LCDCON ((volatile struct s5l87xx_lcdcon *)S5L87XX_LCD_BASE)
 
 static void s5l87xx_lcdcon_read_byte(uint8_t *out) {
     udelay(100);
@@ -256,14 +256,14 @@ enum s5l87xx_buscon_remap {
 #if 0
 static void s5l87xx_buscon_remap_sdram(void) {
     log_debug("s5l87xx_buscon_remap_sdram\n");
-    volatile struct s5l87xx_buscon *buscon = (struct s5l87xx_buscon *)S5L87XX_BUSCON_ADDR;
+    volatile struct s5l87xx_buscon *buscon = (struct s5l87xx_buscon *)S5L87XX_BUS_BASE;
     buscon->remap = S5L87XX_BUSCON_REMAP_ENABLE;
 }
 #endif
 
 static void s5l87xx_otgphy_off(void) {
     log_debug("s5l87xx_otgphy: turning off\n");
-    volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)S5L87XX_PHYBASE_ADDR;
+    volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)S5L87XX_PHY_BASE;
     otgphy->pwr = 0xff;
     mdelay(10);
     otgphy->rstcon = 0xff;
@@ -279,10 +279,10 @@ static void s5l87xx_otgphy_on(void) {
 
     // Disable USB suspend.
     // TODO(q3k): move this to DWC2?
-    volatile uint32_t *pcgcctl = (uint32_t *)(S5L87XX_OTGBASE_ADDR + 0xe00);
+    volatile uint32_t *pcgcctl = (uint32_t *)(S5L87XX_OTG_BASE + 0xe00);
     *pcgcctl = 0;
     
-    volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)S5L87XX_PHYBASE_ADDR;
+    volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)S5L87XX_PHY_BASE;
     otgphy->pwr = 0;
     mdelay(10);
     otgphy->rstcon = 1;
@@ -326,23 +326,23 @@ enum s5l87xx_timer_cmd {
 static struct s5l87xx_timer *s5l87xx_timer_registers(enum s5l87xx_timer_id id) {
     switch (id) {
     case S5L87XX_TIMER_A:
-        return (struct s5l87xx_timer *)S5L87XX_TIMERBASE_ADDR;
+        return (struct s5l87xx_timer *)S5L87XX_TIMER_BASE;
     case S5L87XX_TIMER_B:
-        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0x20);
+        return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0x20);
     case S5L87XX_TIMER_C:
-        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0x40);
+        return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0x40);
     case S5L87XX_TIMER_D:
-        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0x60);
+        return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0x60);
     case S5L87XX_TIMER_E:
-        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0x80);
+        return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0x80);
     case S5L87XX_TIMER_F:
-        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0xa0);
+        return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0xa0);
     case S5L87XX_TIMER_G:
-        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0xc0);
+        return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0xc0);
     case S5L87XX_TIMER_H:
-        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0xe0);
+        return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0xe0);
     case S5L87XX_TIMER_I:
-        return (struct s5l87xx_timer *)(S5L87XX_TIMERBASE_ADDR + 0x100);
+        return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0x100);
     default:
         panic("requested invalid timer id %d", id);
     }

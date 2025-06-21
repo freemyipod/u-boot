@@ -1,4 +1,5 @@
 #include <asm/global_data.h>
+#include <asm/io.h>
 #include <asm/arch/s5l87xx_common.h>
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -40,10 +41,10 @@ int print_cpuinfo(void)
 }
 
 void board_gpio_init(void) {
-    // Enable GPIO pins on N5G.
-    static volatile uint32_t *gpio = (uint32_t *)S5L87XX_GPIOBASE_ADDR;
-    *gpio &= 0xff00ffff;
-    *gpio |= 0x00220000;
+    uint32_t gpio = readl(S5L87XX_PCON0);
+    gpio &= 0xff00ffff;
+    gpio |= 0x00220000;
+    writel(gpio, S5L87XX_PCON0);
 }
 
 void board_clock_init(void) {
@@ -58,19 +59,17 @@ void board_clock_init(void) {
 void board_vic_init(void) {
     // Disable all VIC interrupts.
     // TODO(q3k): disable VIC elsewhere
-    static volatile uint32_t *vic0_enclr = (uint32_t *)(S5L87XX_VICBASE_ADDR + 0x14);
-    static volatile uint32_t *vic1_enclr = (uint32_t *)(S5L87XX_VICBASE_ADDR + 0x14 + 0x1000);
-    *vic0_enclr = 0xffffffff;
-    *vic1_enclr = 0xffffffff;
+    writel(0xffffffff, S5L87XX_VICINTENCLEAR(0));
+    writel(0xffffffff, S5L87XX_VICINTENCLEAR(1));
 }
 
 #ifdef CONFIG_BOARD_EARLY_INIT_F
 int board_early_init_f(void)
 {
-    /* configuring UART TX & RX line GPIO */
+    /* Enable GPIO pins on N5G */
     board_gpio_init();
 
-    /* enabling UART clocking */
+    /* enabling clocking */
     board_clock_init();
     
     /* configure VIC */
