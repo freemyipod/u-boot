@@ -21,12 +21,20 @@
         stdout-path = "serial0";
     };
 
-    clkref: clock-ref {
+    nclk: external_clock {
         compatible = "fixed-clock";
         #clock-cells = <0>;
         clock-frequency = <24000000>;
-        clock-output-names = "clkref";
+        clock-output-names = "nclk";
     };
+
+
+    // pclk: clock-ref {
+    //     compatible = "fixed-clock";
+    //     #clock-cells = <0>;
+    //     clock-frequency = <6000000>;
+    //     clock-output-names = "pclk";
+    // };
 
     cpus {
         #address-cells = <1>;
@@ -64,8 +72,8 @@
             #interrupt-cells = <1>;
         };
 
-        timer_f: timer@3c7000c0 {
-            compatible = "samsung,s5l87xx-pwm";
+        timer: timer@3c700000 {
+            compatible = "samsung,s5l8720-timer";
             reg = <0x3c700000 0x20000>;
             interrupt-parent = <&vic0>;
             interrupts = <7>;
@@ -75,7 +83,7 @@
             compatible = "apple,s5l-uart";
             reg = <0x3dd00000 0x3c>;
             id = <0>;
-            clocks = <&clkref>, <&clkref>;
+            clocks = <&nclk>, <&nclk>;
             clock-names = "uart", "clk_uart_baud0";
             reg-io-width = <4>;
             interrupt-parent = <&vic0>;
@@ -84,7 +92,7 @@
         };
         
         usbphy: usbphy@3c400000 {
-            compatible = "apple,s5l8730-otgphy";
+            compatible = "apple,s5l8702-otgphy";
             reg = <0x3c400000 0x100>;
             status = "okay";
             #phy-cells = <0>;
@@ -97,7 +105,7 @@
             interrupts = <19>;
             phys = <&usbphy>;
             phy-names = "usb2-phy";
-		    clocks = <&clkref>;
+		    clocks = <&nclk>;
 		    clock-names = "otg";
             g-rx-fifo-size = <256>;
             g-np-tx-fifo-size = <32>;
@@ -108,7 +116,7 @@
 
         lcdif: lcdif@38300000 {
             compatible = "samsung,s5l8740-lcdif";
-            reg = <0x38300000 0x10000>, <0x3D800000 0x10000>;
+            reg = <0x38300000 0x10000>;
         };
 
     };
