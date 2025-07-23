@@ -1,0 +1,109 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Samsung's Exynos4 SoC common device tree source
+ *
+ * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ *        http://www.samsung.com
+ */
+
+ /dts-v1/;
+
+#include "skeleton.dtsi"
+
+/ {
+    model = "Apple iPod Nano 2G";
+    compatible = "samsung,s5l8701", "samsung,s5l87xx";
+
+    cpus {
+        cpu@0 {
+            compatible = "arm,arm920t";
+            device_type = "cpu";
+        };
+    };
+
+    memory {
+        device_type = "memory";
+        reg = <0x08000000 0x02000000>;
+    };
+
+
+    aliases {
+        serial0 = "/serial@3cc00000";
+        console = "/serial@3cc00000";
+    };
+
+    chosen {
+        stdout-path = "serial0:115200n8";
+    };
+
+    chipid: chipid {
+        compatible = "samsung,s5l87xx-chipid";
+        reg = <0x3d100000 0x1000>;
+    };
+
+    // TODO?
+    syscon: syscon {
+        compatible = "samsung,s5l87xx-syscon";
+        reg = <0x3c500000 0x1000>;
+    };
+
+    lcdcon: lcdcon@38600000 {
+        compatible = "samsung,s5l8730-lcdcon";
+        reg = <0x38600000 0x10000>;
+    };
+
+    irqs: interrupt-controller@39c00000 {
+        compatible = "samsung,s5l8701-irq";
+        interrupt-controller;
+        reg = <0x39c00000 0x1000>;
+        #interrupt-cells = <1>;
+    };
+
+    timer0: timer@3c700020 {
+        compatible = "samsung,s5l87xx-pwm";
+        reg = <0x3c700000 0x20000>;
+        interrupt-parent = <&irqs>;
+        interrupts = <5>;
+    };
+
+    clkref: clock-ref {
+        compatible = "fixed-clock";
+        #clock-cells = <0>;
+        clock-frequency = <30000000>;
+        clock-output-names = "clkref";
+        u-boot,dm-pre-reloc;
+    };
+
+    serial@3cc00000 {
+        compatible = "apple,s5l-uart";
+        reg = <0x3cc00000 0x3c>;
+        id = <0>;
+        clocks = <&clkref>, <&clkref>;
+        clock-names = "uart", "clk_uart_baud0";
+        u-boot,dm-pre-reloc;
+    };
+
+    usbphy: usbphy@3c400000 {
+        compatible = "apple,s5l8730-otgphy";
+        reg = <0x3c400000 0x100>;
+        status = "okay";
+        #phy-cells = <0>;
+    };
+
+    usbotg_hs: usb@38800000 {
+        compatible = "apple,s5l87xx-usb";
+        reg = <0x38800000 0x40000>;
+        interrupt-parent = <&irqs>;
+        interrupts = <16>;
+        phys = <&usbphy>;
+        phy-names = "usb2-phy";
+        clocks = <&clkref>;
+        clock-names = "otg";
+        g-rx-fifo-size = <256>;
+        g-np-tx-fifo-size = <128>;
+        g-tx-fifo-size = <0>;
+        status = "okay";
+        dr_mode = "peripheral";
+    };
+
+};

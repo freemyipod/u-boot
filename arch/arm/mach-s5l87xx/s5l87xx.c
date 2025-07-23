@@ -25,6 +25,21 @@ typedef struct {
 } s5l87xx_clkgate_mapping; 
 
 static const s5l87xx_clkgate_mapping *s5l87xx_clkgate_mappings[] = {
+#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+    // https://freemyipod.org/wiki/Nano2G_clock_gates
+    &(s5l87xx_clkgate_mapping) {
+        .id = "timer", .clkgate1 = { 0, 4 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "uart", .clkgate1 = { 0, 8 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "usb2-phy", .clkgate1 = { 0, 14 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "usb-otg", .clkgate1 = { 1, 11 },
+    },
+#else
     &(s5l87xx_clkgate_mapping) {
         .id = "timer0", .clkgate1 = { 1, 5 }, .clkgate2 = { 9, 0 },
     },
@@ -71,15 +86,24 @@ static const s5l87xx_clkgate_mapping *s5l87xx_clkgate_mappings[] = {
     &(s5l87xx_clkgate_mapping) {
         .id = "usb2-phy", .clkgate1 = { 1, 3 },
     },
+#endif
     NULL,
 };
 
 void s5l87xx_reset_cpu(void) {
+    svc32_mode_en();
     // According to S5L8700X datasheet
     // rSWRCON = 0xA5 triggers a Software Reset
     // rWDTCON = 0x100000 is not documented but might trigger a Watchdog Reset
     // writel(0xA5, S5L87XX_SWRCON);
+
+#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+    writel(0x110AFF, S5L87XX_WDTCON);
+    writel(0xff0, S5L87XX_WDTCNT);
+    writel(0x1100FF, S5L87XX_WDTCON);
+#else
     writel(0x100000, S5L87XX_WDTCON);
+#endif
 
     while (1)
         ;	/* loop forever till reset */
@@ -87,7 +111,13 @@ void s5l87xx_reset_cpu(void) {
 
 static void s5l87xx_enable_clkgate_bit(uint8_t gate, uint8_t bit) {
     uint32_t mask = ~(((uint32_t) 1) << bit);
+#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+    uint32_t value = readl(S5L87XX_PWRCON(gate));
+    value &= mask;
+    writel(value, S5L87XX_PWRCON(gate));
+#else
     S5L87XX_CLKCON->gates[gate] &= mask;
+#endif
 }
 
 void s5l87xx_enable_clkgate(const char *id) {
@@ -130,25 +160,27 @@ struct s5l87xx_uart {
 // Reference: https://en.wikipedia.org/wiki/Korean_profanity
 
 struct s5l87xx_timer {
-    uint32_t con;     // 0x000
-    uint32_t cmd;     // 0x004
-    uint32_t data0;   // 0x008
-    uint32_t data1;   // 0x00c
-    uint32_t pre;     // 0x010
-    uint32_t cnt;     // 0x014
+    uint32_t con;     // 0x00
+    uint32_t cmd;     // 0x04
+    uint32_t data0;   // 0x08
+    uint32_t data1;   // 0x0c
+    uint32_t pre;     // 0x10
+    uint32_t cnt;     // 0x14
 };
 
 struct s5l87xx_otgphy {
-    uint32_t pwr;
-    uint32_t con;
-    uint32_t rstcon;
-    uint32_t unk[4];
-    uint32_t unkcon;
+    uint32_t pwr;     // 0x00
+    uint32_t con;     // 0x04
+    uint32_t rstcon;  // 0x08
+    uint32_t unk[4];  // 0x0c, 0x10, 0x14, 0x18
+    uint32_t unkcon;  // 0x1c
+    uint32_t pad[36]; // 0x20 - 0x44
+    uint32_t unk44;   // 0x44
 };
 
 struct s5l87xx_buscon {
-    uint32_t unk[3];
-    uint32_t remap;
+    uint32_t unk[3]; // 0x00, 0x04, 0x08
+    uint32_t remap;  // 0x0c
 };
 
 struct s5l87xx_lcdcon {
@@ -264,11 +296,18 @@ static void s5l87xx_buscon_remap_sdram(void) {
 static void s5l87xx_otgphy_off(void) {
     log_debug("s5l87xx_otgphy: turning off\n");
     volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)S5L87XX_PHY_BASE;
+#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+    otgphy->pwr = 0x0f;    /* PHY: Power down */
+    udelay(10);
+    otgphy->rstcon = 0x07; /* PHY: Assert Software Reset */
+    udelay(10);
+#else
     otgphy->pwr = 0xff;
     mdelay(10);
     otgphy->rstcon = 0xff;
     mdelay(10);
     otgphy->unkcon = 4;
+#endif
 }
 
 static void s5l87xx_otgphy_on(void) {
@@ -283,7 +322,19 @@ static void s5l87xx_otgphy_on(void) {
     *pcgcctl = 0;
     
     volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)S5L87XX_PHY_BASE;
-    otgphy->pwr = 0;
+    otgphy->pwr = 0; /* PHY: Power up */
+#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+    udelay(10);
+    otgphy->unkcon = 1;
+    otgphy->unk44 = 0xe3f;
+    otgphy->rstcon = 1; /* PHY: Assert Software Reset */
+    udelay(10);
+    otgphy->rstcon = 0; /* PHY: Deassert Software Reset */
+    udelay(10);
+    otgphy->unk[3] = 0x600;
+    otgphy->con = 0;
+    udelay(400);
+#else
     mdelay(10);
     otgphy->rstcon = 1;
     mdelay(10);
@@ -292,6 +343,7 @@ static void s5l87xx_otgphy_on(void) {
     otgphy->unkcon = 6;
     otgphy->con = 1;
     mdelay(400);
+#endif
 }
 
 void otg_phy_init(void *unused) {
@@ -308,6 +360,7 @@ enum s5l87xx_timer_id {
     S5L87XX_TIMER_B = 1,
     S5L87XX_TIMER_C = 2,
     S5L87XX_TIMER_D = 3,
+#if !IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
     // Timer E: 64-bit (unimplemented, different registers from others)
     S5L87XX_TIMER_E = 4,
     // Timers F, G, H, I: 32-bit
@@ -315,7 +368,14 @@ enum s5l87xx_timer_id {
     S5L87XX_TIMER_G = 6,
     S5L87XX_TIMER_H = 7,
     S5L87XX_TIMER_I = 8,
+#endif
 };
+
+#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+#define SYSTEM_TIMER S5L87XX_TIMER_C
+#else
+#define SYSTEM_TIMER S5L87XX_TIMER_F
+#endif
 
 enum s5l87xx_timer_cmd {
     S5L87XX_TIMER_CMD_STOP = 0,
@@ -333,6 +393,7 @@ static struct s5l87xx_timer *s5l87xx_timer_registers(enum s5l87xx_timer_id id) {
         return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0x40);
     case S5L87XX_TIMER_D:
         return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0x60);
+#if !IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
     case S5L87XX_TIMER_E:
         return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0x80);
     case S5L87XX_TIMER_F:
@@ -343,12 +404,16 @@ static struct s5l87xx_timer *s5l87xx_timer_registers(enum s5l87xx_timer_id id) {
         return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0xe0);
     case S5L87XX_TIMER_I:
         return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0x100);
+#endif
     default:
         panic("requested invalid timer id %d", id);
     }
 }
 
 static const char* s5l87xx_timer_clockgate(enum s5l87xx_timer_id id) {
+#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+    return "timer";
+#else
     switch (id) {
     case S5L87XX_TIMER_A:
         return "timer0";
@@ -371,6 +436,7 @@ static const char* s5l87xx_timer_clockgate(enum s5l87xx_timer_id id) {
     default:
         panic("requested invalid timer id %d", id);
     }
+#endif
 }
 
 static void s5l87xx_timer_configure_interval(enum s5l87xx_timer_id id) {
@@ -380,9 +446,17 @@ static void s5l87xx_timer_configure_interval(enum s5l87xx_timer_id id) {
     volatile struct s5l87xx_timer *timer = s5l87xx_timer_registers(id);
 
     timer->cmd = S5L87XX_TIMER_CMD_STOP;
+#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+    /* configure timer for 1000 Hz??? */
+    timer->con = (3 << 8) | (1 << 4);
+    timer->pre = 511;
+    timer->data0 = 0xffff;
+    timer->data1 = 0xffff;
+#else
     timer->con = 0x40;
     timer->pre = 0xb;
     timer->data0 = 0xffffffff;
+#endif
     timer->cmd = S5L87XX_TIMER_CMD_CLR;
 }
 
@@ -408,13 +482,28 @@ static uint32_t s5l87xx_timer_read(enum s5l87xx_timer_id id) {
 
 int timer_init(void)
 {
-    s5l87xx_timer_configure_interval(S5L87XX_TIMER_F);
-    s5l87xx_timer_start(S5L87XX_TIMER_F);
+    s5l87xx_timer_configure_interval(SYSTEM_TIMER);
+    s5l87xx_timer_start(SYSTEM_TIMER);
 
     return 0;
 }
 
 unsigned long timer_read_counter(void)
 {
-    return s5l87xx_timer_read(S5L87XX_TIMER_F);
+#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+    static uint16_t last = 0;
+    static uint16_t high = 0;
+    
+    uint16_t now = s5l87xx_timer_read(SYSTEM_TIMER);
+
+    if (last > now) {
+        high++;
+    }
+
+    last = now;
+
+    return ((uint32_t)high << 16) | (uint32_t)now;
+#else
+    return s5l87xx_timer_read(SYSTEM_TIMER);
+#endif
 }
