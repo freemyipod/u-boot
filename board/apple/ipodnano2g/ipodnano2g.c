@@ -60,10 +60,3 @@ int board_early_init_f(void)
     return 0;
 }
 #endif
-
-#ifdef CONFIG_DEBUG_UART_BOARD_INIT
-void board_debug_uart_init(void)
-{
-    board_clock_init();
-}
-#endif
