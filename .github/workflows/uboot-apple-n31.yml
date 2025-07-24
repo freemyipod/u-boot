@@ -1,4 +1,4 @@
-name: Build U-Boot for Apple N31
+name: Build U-Boot for Apple N31 - iPod nano (7th generation)
 
 on: push
 
