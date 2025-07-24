@@ -1,4 +1,4 @@
-name: Build U-Boot for Apple N33
+name: Build U-Boot for Apple N33 - iPod nano (5th generation)
 
 on: push
 

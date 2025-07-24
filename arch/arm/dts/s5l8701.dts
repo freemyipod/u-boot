@@ -11,7 +11,7 @@
 #include "skeleton.dtsi"
 
 / {
-    model = "Apple iPod Nano (2nd generation)";
+    model = "Apple iPod nano (2nd generation)";
     compatible = "samsung,s5l8701", "samsung,s5l87xx";
 
     cpus {
