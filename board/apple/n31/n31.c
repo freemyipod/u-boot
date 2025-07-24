@@ -78,12 +78,23 @@ void enable_caches(void)
 #ifdef CONFIG_BOARD_EARLY_INIT_F
 int board_early_init_f(void)
 {
-	/* configuring UART TX & RX line GPIO */
+	/* Configure UART TX & RX line GPIO */
     board_gpio_init();
 
-    /* enabling UART clocking */
+    /* Enable UART clocking */
     board_clock_init();
 
 	return 0;
+}
+#endif
+
+#ifdef CONFIG_DEBUG_UART_BOARD_INIT
+void board_debug_uart_init(void)
+{
+    /* Configure UART TX & RX line GPIO */
+    board_gpio_init();
+
+    /* Enable UART clocking */
+    board_clock_init();
 }
 #endif
