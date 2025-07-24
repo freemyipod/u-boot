@@ -11,10 +11,13 @@
 #include "skeleton.dtsi"
 
 / {
-    model = "Apple iPod Nano 2G";
+    model = "Apple iPod Nano (2nd generation)";
     compatible = "samsung,s5l8701", "samsung,s5l87xx";
 
     cpus {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        
         cpu@0 {
             compatible = "arm,arm920t";
             device_type = "cpu";
@@ -28,8 +31,8 @@
 
 
     aliases {
-        serial0 = "/serial@3cc00000";
-        console = "/serial@3cc00000";
+        serial0 = &uart0;
+        console = &uart0;
     };
 
     chosen {
@@ -73,7 +76,7 @@
         clock-output-names = "clkref";
     };
 
-    serial@3cc00000 {
+    uart0: uart@3cc00000 {
         compatible = "apple,s5l-uart";
         reg = <0x3cc00000 0x3c>;
         id = <0>;
