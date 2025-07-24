@@ -4,15 +4,15 @@ choice
     prompt "S5L87XX board select"
 
 config TARGET_IPODNANO2G
-    bool "Apple iPod Nano 2G"
+    bool "Apple iPod nano (2nd generation)"
     select CPU_ARM920T
 
 config TARGET_N33
-    bool "Apple N33 (iPod Nano 5G)"
+    bool "Apple N33 - iPod nano (5th generation)"
     select CPU_ARM1176
 
 config TARGET_N31
-    bool "Apple N31 (iPod Nano 7G)"
+    bool "Apple N31 - iPod nano (7th generation)"
     select CPU_V7A
 
 endchoice

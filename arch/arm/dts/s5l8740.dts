@@ -9,7 +9,7 @@
 / {
     #address-cells = <1>;
 	#size-cells = <1>;
-    model = "Apple iPod Nano (7th Geneneration)";
+    model = "Apple iPod nano (7th generation)";
     compatible = "apple,n31", "samsung,s5l8740";
 
     aliases {
