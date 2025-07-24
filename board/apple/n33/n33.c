@@ -66,15 +66,26 @@ void board_vic_init(void) {
 #ifdef CONFIG_BOARD_EARLY_INIT_F
 int board_early_init_f(void)
 {
-    /* Enable GPIO pins on N5G */
+    /* Enable GPIO pins */
     board_gpio_init();
 
-    /* enabling clocking */
+    /* Enable clocking */
     board_clock_init();
     
-    /* configure VIC */
+    /* Configure VIC */
     board_vic_init();
 
     return 0;
+}
+#endif
+
+#ifdef CONFIG_DEBUG_UART_BOARD_INIT
+void board_debug_uart_init(void)
+{
+    /* Enable GPIO pins */
+    board_gpio_init();
+    
+    /* Enable UART clocking */
+    s5l87xx_enable_clkgate("uart0");
 }
 #endif
