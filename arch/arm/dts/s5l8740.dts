@@ -119,5 +119,15 @@
             reg = <0x38300000 0x10000>;
         };
 
+        wdt: watchdog@3c800000 {
+            compatible = "syscon", "simple-mfd";
+            reg = <0x3c800000 0x8>;
+
+            reboot: syscon-reboot@3c800000 {
+                compatible = "syscon-reboot";
+                offset = <0x0>;
+                value = <0x100000>;
+            };
+        };
     };
 };
