@@ -129,5 +129,31 @@
                 value = <0x100000>;
             };
         };
+
+        gpio5: gpio@3cf00000 {
+            compatible = "brcm,bcm6345-gpio";
+            reg-names = "dat";
+            reg = <0x3cf000a4 0x4>;
+            #gpio-cells = <2>;
+            gpio-controller;
+            ngpios = <2>;
+        };
+
+        gpio-keys {
+            compatible = "gpio-keys-polled";
+            poll-interval = <10>;
+
+            volume-up-button {
+                label = "Volume Up";
+                linux,code = <115>; /* KEY_VOLUMEUP */
+                gpios = <&gpio5 0 1>; /* GPIO_ACTIVE_LOW */
+            };
+
+            volume-down-button {
+                label = "Volume Down";
+                linux,code = <114>; /* KEY_VOLUMEDOWN */
+                gpios = <&gpio5 1 1>; /* GPIO_ACTIVE_LOW */
+            };
+        };
     };
 };
