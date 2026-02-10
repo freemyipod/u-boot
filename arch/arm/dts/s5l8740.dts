@@ -172,6 +172,14 @@
             interrupt-parent = <&vic0>;
             interrupts = <22>;
             status = "okay";
+
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            lis3dh: accelerometer@18 {
+                compatible = "st,lis3dh-accel";
+                reg = <0x18>;
+            };
         };
     };
 };
