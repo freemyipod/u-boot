@@ -287,7 +287,7 @@ int usb_gadget_register_driver(struct usb_gadget_driver *driver)
 
 	enable_irq(IRQ_OTG);
 
-#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+#if IS_ENABLED(CONFIG_TARGET_N36)
 	uint32_t value = readl(S5L87XX_INTMSK);
 	value |= 1 << IRQ_USB_FUNC;
 	writel(value, S5L87XX_INTMSK);
@@ -322,7 +322,7 @@ int usb_gadget_unregister_driver(struct usb_gadget_driver *driver)
 
 	disable_irq(IRQ_OTG);
 
-#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+#if IS_ENABLED(CONFIG_TARGET_N36)
 	uint32_t value = readl(S5L87XX_INTMSK);
 	value &= ~(1 << IRQ_USB_FUNC);
 	writel(value, S5L87XX_INTMSK);
