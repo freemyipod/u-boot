@@ -1,12 +1,12 @@
-if TARGET_IPODNANO2G
+if TARGET_N36
 
 config SYS_BOARD
-    default "ipodnano2g"
+    default "n36"
 
 config SYS_VENDOR
     default "apple"
 
 config SYS_CONFIG_NAME
-    default "apple_ipodnano2g"
+    default "apple_n36"
 
 endif
