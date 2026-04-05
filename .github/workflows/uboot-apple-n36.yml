@@ -1,4 +1,4 @@
-name: Build U-Boot for Apple iPod nano (2nd generation)
+name: Build U-Boot for Apple N36 - iPod nano (2nd generation)
 
 on: push
 
@@ -14,7 +14,7 @@ jobs:
 
       - name: Configure U-Boot
         run: |
-          make apple_ipodnano2g_defconfig
+          make apple_n36_defconfig
 
       - name: Build U-Boot
         run: |
@@ -23,7 +23,7 @@ jobs:
       - name: Upload U-Boot artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: u-boot-apple-ipodnano2g-artifacts
+          name: u-boot-apple-n36-artifacts
           path: |
             u-boot*
             dts/dt.dtb

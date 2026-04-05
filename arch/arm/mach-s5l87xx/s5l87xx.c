@@ -25,7 +25,7 @@ typedef struct {
 } s5l87xx_clkgate_mapping; 
 
 static const s5l87xx_clkgate_mapping *s5l87xx_clkgate_mappings[] = {
-#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+#if IS_ENABLED(CONFIG_TARGET_N36)
     // https://freemyipod.org/wiki/Nano2G_clock_gates
     &(s5l87xx_clkgate_mapping) {
         .id = "timer", .clkgate1 = { 0, 4 },
@@ -97,7 +97,7 @@ void s5l87xx_reset_cpu(void) {
     // rWDTCON = 0x100000 is not documented but might trigger a Watchdog Reset
     // writel(0xA5, S5L87XX_SWRCON);
 
-#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+#if IS_ENABLED(CONFIG_TARGET_N36)
     writel(0x110AFF, S5L87XX_WDTCON);
     writel(0xff0, S5L87XX_WDTCNT);
     writel(0x1100FF, S5L87XX_WDTCON);
@@ -111,7 +111,7 @@ void s5l87xx_reset_cpu(void) {
 
 static void s5l87xx_enable_clkgate_bit(uint8_t gate, uint8_t bit) {
     uint32_t mask = ~(((uint32_t) 1) << bit);
-#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+#if IS_ENABLED(CONFIG_TARGET_N36)
     uint32_t value = readl(S5L87XX_PWRCON(gate));
     value &= mask;
     writel(value, S5L87XX_PWRCON(gate));
@@ -296,7 +296,7 @@ static void s5l87xx_buscon_remap_sdram(void) {
 static void s5l87xx_otgphy_off(void) {
     log_debug("s5l87xx_otgphy: turning off\n");
     volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)S5L87XX_PHY_BASE;
-#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+#if IS_ENABLED(CONFIG_TARGET_N36)
     otgphy->pwr = 0x0f;    /* PHY: Power down */
     udelay(10);
     otgphy->rstcon = 0x07; /* PHY: Assert Software Reset */
@@ -323,7 +323,7 @@ static void s5l87xx_otgphy_on(void) {
     
     volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)S5L87XX_PHY_BASE;
     otgphy->pwr = 0; /* PHY: Power up */
-#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+#if IS_ENABLED(CONFIG_TARGET_N36)
     udelay(10);
     otgphy->unkcon = 1;
     otgphy->unk44 = 0xe3f;
@@ -360,7 +360,7 @@ enum s5l87xx_timer_id {
     S5L87XX_TIMER_B = 1,
     S5L87XX_TIMER_C = 2,
     S5L87XX_TIMER_D = 3,
-#if !IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+#if !IS_ENABLED(CONFIG_TARGET_N36)
     // Timer E: 64-bit (unimplemented, different registers from others)
     S5L87XX_TIMER_E = 4,
     // Timers F, G, H, I: 32-bit
@@ -371,7 +371,7 @@ enum s5l87xx_timer_id {
 #endif
 };
 
-#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+#if IS_ENABLED(CONFIG_TARGET_N36)
 #define SYSTEM_TIMER S5L87XX_TIMER_C
 #else
 #define SYSTEM_TIMER S5L87XX_TIMER_F
@@ -393,7 +393,7 @@ static struct s5l87xx_timer *s5l87xx_timer_registers(enum s5l87xx_timer_id id) {
         return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0x40);
     case S5L87XX_TIMER_D:
         return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0x60);
-#if !IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+#if !IS_ENABLED(CONFIG_TARGET_N36)
     case S5L87XX_TIMER_E:
         return (struct s5l87xx_timer *)(S5L87XX_TIMER_BASE + 0x80);
     case S5L87XX_TIMER_F:
@@ -411,7 +411,7 @@ static struct s5l87xx_timer *s5l87xx_timer_registers(enum s5l87xx_timer_id id) {
 }
 
 static const char* s5l87xx_timer_clockgate(enum s5l87xx_timer_id id) {
-#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+#if IS_ENABLED(CONFIG_TARGET_N36)
     return "timer";
 #else
     switch (id) {
@@ -446,7 +446,7 @@ static void s5l87xx_timer_configure_interval(enum s5l87xx_timer_id id) {
     volatile struct s5l87xx_timer *timer = s5l87xx_timer_registers(id);
 
     timer->cmd = S5L87XX_TIMER_CMD_STOP;
-#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+#if IS_ENABLED(CONFIG_TARGET_N36)
     /* configure timer for 1000 Hz??? */
     timer->con = (3 << 8) | (1 << 4);
     timer->pre = 511;
@@ -490,7 +490,7 @@ int timer_init(void)
 
 unsigned long timer_read_counter(void)
 {
-#if IS_ENABLED(CONFIG_TARGET_IPODNANO2G)
+#if IS_ENABLED(CONFIG_TARGET_N36)
     static uint16_t last = 0;
     static uint16_t high = 0;
     
