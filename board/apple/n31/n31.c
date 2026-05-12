@@ -57,14 +57,20 @@ void board_clock_init(void) {
     // writel(0x1BA585, S5L87XX_PWRCON(0));
     
     value = readl(S5L87XX_PWRCON(1));
-    value &= ~(1<<31); // 1<<31 UART(?)
+    value &= ~(1<<9);   // UART0
+    value &= ~(1<<29);  // UART1
+    value &= ~(1<<30);  // UART2
+    value &= ~(1<<31);  // UART3
     writel(value, S5L87XX_PWRCON(1));
 
     // writel(0x1AF1, S5L87XX_PWRCON(2));
     // writel(0x3C0FC, S5L87XX_PWRCON(3));
 
     value = readl(S5L87XX_PWRCON(4));
-    value &= ~(1<<10);
+    value &= ~(1<<7);   // UART0
+    value &= ~(1<<8);   // UART1
+    value &= ~(1<<9);   // UART2
+    value &= ~(1<<10);  // UART3
     writel(value, S5L87XX_PWRCON(4));
 }
 
