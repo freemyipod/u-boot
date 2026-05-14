@@ -16,7 +16,6 @@
  * Marek Szyprowski <m.szyprowski@samsung.com>
  * Lukasz Majewski <l.majewski@samsumg.com>
  */
-//#define DEBUG 1
 #include <common.h>
 #include <clk.h>
 #include <dm.h>
@@ -225,6 +224,16 @@ static int udc_enable(struct dwc2_udc *dev)
 	debug_cond(DEBUG_SETUP != 0, "%s: %p\n", __func__, dev);
 
 	otg_phy_init(dev);
+
+	/* Pulse SOFT_DISCONNECT here so the host sees a clean reconnect.
+	 * Keeping this out of reconfig_usbd prevents a reset loop: without
+	 * this separation, every USB bus reset from the host would call
+	 * reconfig_usbd → disconnect → host resets → reconfig_usbd → ... */
+	u32 dctl = readl(&reg->dctl);
+	writel(dctl | SOFT_DISCONNECT, &reg->dctl);
+	udelay(20);
+	writel(dctl & ~SOFT_DISCONNECT, &reg->dctl);
+
 	reconfig_usbd(dev);
 
 	debug_cond(DEBUG_SETUP != 0,
@@ -494,18 +503,6 @@ static void reconfig_usbd(struct dwc2_udc *dev)
 	debug("GUSBCFG -> %08x\n", readl(&reg->gusbcfg));
 	debug("GUSBCFG -> %08x\n", readl(&reg->gusbcfg));
 	debug("GUSBCFG -> %08x\n", readl(&reg->gusbcfg));
-
-	/* 3. Put the OTG device core in the disconnected state.*/
-	uTemp = readl(&reg->dctl);
-	uTemp |= SOFT_DISCONNECT;
-	writel(uTemp, &reg->dctl);
-
-	udelay(20);
-
-	/* 4. Make the OTG device core exit from the disconnected state.*/
-	uTemp = readl(&reg->dctl);
-	uTemp = uTemp & ~SOFT_DISCONNECT;
-	writel(uTemp, &reg->dctl);
 
 	/* 5. Configure OTG Core to initial settings of device mode.*/
 	/* [][1: full speed(30Mhz) 0:high speed]*/
@@ -1058,6 +1055,19 @@ static void dwc2_set_stm32mp1_hsotg_params(struct dwc2_plat_otg_data *p)
 		p->usb_gusbcfg |= 1 << 30; /* FDMOD: Force device mode */
 }
 
+static void dwc2_set_applenano3g_hsotg_params(struct dwc2_plat_otg_data *p)
+{
+	/* No STM32 SYSCFG/GGPIO on Apple hardware. */
+	p->activate_stm_id_vb_detection = false;
+	p->usb_gusbcfg =
+		0 << 15		/* PHY Low Power Clock sel*/
+		| 0x5 << 10	/* USB Turnaround time (5 for 16-bit UTMI at 30MHz) */
+		| 0 << 9	/* [0:HNP disable] */
+		| 0 << 8	/* [0:SRP disable] */
+		| 0 << 6	/* 0: high speed utmi+, 1: full speed serial*/
+		| 1 << 3;	/* phy i/f  0:8bit, 1:16bit*/
+}
+
 static void dwc2_set_applenano5g_hsotg_params(struct dwc2_plat_otg_data *p)
 {
 	p->activate_stm_id_vb_detection = true;
@@ -1209,6 +1219,8 @@ static const struct udevice_id dwc2_udc_otg_ids[] = {
 	{ .compatible = "brcm,bcm2835-usb" },
 	{ .compatible = "st,stm32mp15-hsotg",
 	  .data = (ulong)dwc2_set_stm32mp1_hsotg_params },
+	{ .compatible = "apple,ipodnano3g-usb",
+	  .data = (ulong)dwc2_set_applenano3g_hsotg_params },
 	{ .compatible = "apple,ipodnano5g-usb",
 	  .data = (ulong)dwc2_set_applenano5g_hsotg_params },
 	{},

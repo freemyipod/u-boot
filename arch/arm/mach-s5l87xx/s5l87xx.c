@@ -1,5 +1,3 @@
-#define DEBUG 1
-
 #include <stdint.h>
 #include <init.h>
 #include <asm/io.h>
@@ -124,7 +122,7 @@ static void s5l87xx_enable_clkgate_bit(uint8_t gate, uint8_t bit) {
 
 static void s5l87xx_enable_clkgate(const char *id) {
     s5l87xx_clkgate_mapping const **mapping = s5l87xx_clkgate_mappings;
-    while (mapping != NULL) {
+    while (*mapping != NULL) {
         const s5l87xx_clkgate_mapping *m = *mapping;
         if (strcmp(m->id, id) != 0) {
             mapping++;
@@ -235,20 +233,14 @@ void s5l87xx_lcd_init(void) {
     S5L87XX_LCDCON->phtime = 0x33;
     
     enum s5l87xx_lcd_type type = s5l87xx_lcdcon_get_type();
-    const char* types = "UNKNOWN";
+    const char *types;
     switch (type) {
-    case S5L87XX_LCD_TYPE_38C4:
-        types = "38c4";
-    case S5L87XX_LCD_TYPE_38B3:
-        types = "38b3";
-    case S5L87XX_LCD_TYPE_38D5:
-        types = "38d5";
-    case S5L87XX_LCD_TYPE_38E6:
-        types = "38e6";
-    case S5L87XX_LCD_TYPE_58XX:
-        types = "58xx";
-    default:
-        break;
+    case S5L87XX_LCD_TYPE_38B3: types = "38b3"; break;
+    case S5L87XX_LCD_TYPE_38C4: types = "38c4"; break;
+    case S5L87XX_LCD_TYPE_38D5: types = "38d5"; break;
+    case S5L87XX_LCD_TYPE_38E6: types = "38e6"; break;
+    case S5L87XX_LCD_TYPE_58XX: types = "58xx"; break;
+    default:                    types = "unknown"; break;
     }
     debug("%s: detected LCD type %s (%d)\n", __func__, types, type);
 }
@@ -296,46 +288,62 @@ static void s5l87xx_buscon_remap_sdram(void) {
 }
 
 // OTG PHY Functions and Definitions
+// Register layout reverse-engineered from s5l8702 disk mode QEMU trace.
 
 struct s5l87xx_otgphy {
-    uint32_t pwr;
-    uint32_t clk;
-    uint32_t rstcon;
-    uint32_t unk3;
-    uint32_t unk1;
-    uint32_t unk2;
+    uint32_t pwr;        // 0x00 - power down control
+    uint32_t clk;        // 0x04 - clock select
+    uint32_t rstcon;     // 0x08 - reset control (3 bits)
+    uint32_t pad0[3];    // 0x0c-0x14
+    uint32_t bias;       // 0x18 - analog bias/trim
+    uint32_t pad1[5];    // 0x1c-0x2c  (0x28 read-only by bootrom)
+    uint32_t intfcon;    // 0x30 - interface control
+    uint32_t pad2[3];    // 0x34-0x3c
+    uint32_t phy_ctrl1;  // 0x40 - analog power stage 1
+    uint32_t phy_ctrl2;  // 0x44 - analog power stage 2
 };
 
 static void s5l87xx_otgphy_off(void) {
     debug("s5l87xx_otgphy: turning off\n");
-    volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)0x3c400000;
-    otgphy->pwr = 0xf;
-    mdelay(10);
-    otgphy->rstcon = 0x7;
+    volatile struct s5l87xx_otgphy *phy = (struct s5l87xx_otgphy *)0x3c400000;
+    phy->phy_ctrl2 = 0;
+    phy->phy_ctrl1 = 0;
+    phy->rstcon = 0x7;
+    phy->pwr = 0xff;
 }
 
 static void s5l87xx_otgphy_on(void) {
-    // TODO(q3k): lmao
-    s5l87xx_gpio_init();
-    s5l87xx_lcd_init();
-
     debug("s5l87xx_otgphy: turning on\n");
     s5l87xx_enable_clkgate("usb-otg");
     s5l87xx_enable_clkgate("usb2-phy");
-    mdelay(10);
 
-    volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)0x3c400000;
-    otgphy->pwr = 0;
-    mdelay(10);
-    otgphy->unk1 = 1;
-    otgphy->unk2 = 0xe3f;
-    otgphy->rstcon = 1; // Assert Software Reset
-    mdelay(10);
-    otgphy->rstcon = 0;
-    mdelay(10);
-    otgphy->unk3 = 0x600;
-    otgphy->clk = 0;
-    mdelay(400);
+    volatile struct s5l87xx_otgphy *phy = (struct s5l87xx_otgphy *)0x3c400000;
+    volatile uint32_t *phy_enable = (uint32_t *)0x3c400100;
+
+    phy->pwr    = 0x000;
+    phy->clk    = 0x000;
+    phy->bias   = 0x400;
+    phy->rstcon = 0x007;  // assert all three reset signals
+
+    // Ramp up PHY analog stage 1 incrementally (from disk mode trace).
+    phy->phy_ctrl1 = 0x300;
+    phy->phy_ctrl1 = 0x340;
+    phy->phy_ctrl1 = 0x346;
+    phy->phy_ctrl1 = 0x347;
+
+    // Ramp up PHY analog stage 2 incrementally (from disk mode trace).
+    phy->phy_ctrl2 = 0x0c00;
+    phy->phy_ctrl2 = 0x0fc0;
+    phy->phy_ctrl2 = 0x0fe0;
+    phy->phy_ctrl2 = 0x0ff0;
+    phy->phy_ctrl2 = 0x0fff;
+
+    *phy_enable = 1;      // enable PHY output
+
+    phy->rstcon  = 0x000; // deassert reset
+    phy->bias    = 0x400;
+    phy->intfcon = 0x000;
+    phy->bias    = 0x000;
 }
 
 void otg_phy_init(void *unused) {
@@ -469,16 +477,14 @@ unsigned long timer_read_counter(void) {
     return s5l87xx_timer_read(S5L87XX_TIMER_F);
 }
 
-// TODO(q3k): move board early init to board
 int board_early_init_f(void) {
-    debug("board_early_init_f\n");
-    // HACKHACKHACK add a pmctrl to linux
-    // needed for timer c0..???
-    s5l87xx_enable_clkgate("timer3");
-    // HACKHACKHACK
+    s5l87xx_gpio_init();
+    s5l87xx_lcd_init();
 
-    // Disable all VIC interrupts.
-    // TODO(q3k): disable VIC elsewhere
+    // Linux needs timer3 ungated for pmctrl.
+    s5l87xx_enable_clkgate("timer3");
+
+    // Disable all VIC interrupts before U-Boot configures them.
     static volatile uint32_t *vic0_enclr = (uint32_t *)0x38e00014;
     static volatile uint32_t *vic1_enclr = (uint32_t *)0x38e01014;
     *vic0_enclr = 0xffffffff;
@@ -487,7 +493,7 @@ int board_early_init_f(void) {
     s5l87xx_enable_clkgate("usb-otg");
     s5l87xx_enable_clkgate("usb2-phy");
 
-    // Disable USB suspend. TODO(q3k): move this to DWC2?
+    // Disable USB power-clock gating so the DWC2 core is accessible.
     volatile uint32_t *pcgcctl = (uint32_t *)0x38400e00;
     *pcgcctl = 0;
     return 0;
@@ -498,10 +504,8 @@ int board_early_init_f(void) {
 void board_debug_uart_init(void) {
     s5l87xx_enable_clkgate("uart0");
 
-    // Enable GPIO pins on N5G.
     static volatile uint32_t *gpio = (uint32_t *)0x3cf00000;
     *gpio &= 0xff00ffff;
     *gpio |= 0x00220000;
 }
-
 #endif
