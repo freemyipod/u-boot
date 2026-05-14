@@ -1,10 +1,13 @@
 #define DEBUG 1
 
+#include <stdint.h>
 #include <init.h>
 #include <asm/io.h>
 #include <linux/delay.h>
 
 DECLARE_GLOBAL_DATA_PTR;
+
+// Clockgate mapping definitions
 
 typedef struct {
     uint32_t pad[18];
@@ -27,7 +30,65 @@ typedef struct {
 
 static const s5l87xx_clkgate_mapping *s5l87xx_clkgate_mappings[] = {
     &(s5l87xx_clkgate_mapping) {
+        .id = "sha", .clkgate1 = { 0, 0 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "lcd", .clkgate1 = { 0, 1 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "usb-otg", .clkgate1 = { 0, 2 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "smx", .clkgate1 = { 0, 3 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "sm1", .clkgate1 = { 0, 4 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "ata", .clkgate1 = { 0, 5 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "nand", .clkgate1 = { 0, 8 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "sdci", .clkgate1 = { 0, 9 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "aes", .clkgate1 = { 0, 10 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "nandecc", .clkgate1 = { 0, 12 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "dmac0", .clkgate1 = { 0, 25 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "dmac1", .clkgate1 = { 0, 26 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "rom", .clkgate1 = { 0, 30 },
+    },
+
+    &(s5l87xx_clkgate_mapping) {
+        .id = "rtc", .clkgate1 = { 1, 0 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "cwheel", .clkgate1 = { 1, 1 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "spi0", .clkgate1 = { 1, 2 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "usb2-phy", .clkgate1 = { 1, 3 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "i2c0", .clkgate1 = { 1, 4 },
+    },
+    &(s5l87xx_clkgate_mapping) {
         .id = "timer0", .clkgate1 = { 1, 5 }, .clkgate2 = { 9, 0 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "uart0", .clkgate1 = { 1, 9 }, .clkgate2 = { 9, 7 },
     },
     &(s5l87xx_clkgate_mapping) {
         .id = "timer1", .clkgate1 = { 1, 23 }, .clkgate2 = { 9, 1 },
@@ -52,15 +113,6 @@ static const s5l87xx_clkgate_mapping *s5l87xx_clkgate_mappings[] = {
     },
     &(s5l87xx_clkgate_mapping) {
         .id = "timer8", .clkgate1 = { 4, 6 }, .clkgate2 = { 9, 23 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "uart0", .clkgate1 = { 1, 9 }, .clkgate2 = { 9, 7 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "usb-otg", .clkgate1 = { 0, 2 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "usb2-phy", .clkgate1 = { 1, 3 },
     },
     NULL,
 };
@@ -89,6 +141,8 @@ static void s5l87xx_enable_clkgate(const char *id) {
     panic("s5l87xx_enable_clkgate: unknown id %s", id);
 }
 
+// UART Functions and Definitions
+
 struct s5l87xx_uart {
     uint32_t ulcon;    // 0x00
     uint32_t ucon;     // 0x04
@@ -104,126 +158,131 @@ struct s5l87xx_uart {
     uint32_t ubrcontx; // 0x38
 };
 
-// These are all undocumented. The following is gathered from
-// reverse-engineering work of the original iPod firmware.
-//
-// Reference: https://en.wikipedia.org/wiki/Korean_profanity
+// LCD Functions and Definitions
 
-struct s5l87xx_timer {
-    uint32_t con;     // 0x000
-    uint32_t cmd;     // 0x004
-    uint32_t data0;   // 0x008
-    uint32_t data1;   // 0x00c
-    uint32_t pre;     // 0x010
-    uint32_t cnt;     // 0x014
+#define S5L87XX_LCDCON ((volatile struct s5l87xx_lcdcon *)0x38300000)
+
+struct s5l87xx_lcdcon {
+    uint32_t config; // 0x00
+    uint32_t wcmd;   // 0x04
+    uint32_t unk1;   // 0x08
+    uint32_t rcmd;   // 0x0C
+    uint32_t rdata;  // 0x10
+    uint32_t dbuff;  // 0x14
+    uint32_t intcon; // 0x18
+    uint32_t status; // 0x1C
+    uint32_t phtime; // 0x20
+    uint32_t unk[4]; // 0x24
+    uint32_t wdata;  // 0x40
 };
 
-struct s5l87xx_otgphy {
-    uint32_t pwr;
-    uint32_t con;
-    uint32_t rstcon;
-    uint32_t unk[4];
-    uint32_t unkcon;
+enum s5l87xx_lcd_type {
+    S5L87XX_LCD_TYPE_UNKNOWN = -1,
+    S5L87XX_LCD_TYPE_38B3 = 0,
+    S5L87XX_LCD_TYPE_38C4,
+    S5L87XX_LCD_TYPE_38D5,
+    S5L87XX_LCD_TYPE_38E6,
+    S5L87XX_LCD_TYPE_58XX,
+    N_LCD_TYPES
 };
+
+static void s5l_lcd_write_cmd(uint16_t cmd) {
+    while (S5L87XX_LCDCON->status & 0x10);
+    S5L87XX_LCDCON->wcmd = cmd;
+}
+
+static void s5l_lcd_recv_cmd8(uint8_t cmd, int len, uint8_t *buf) {
+    s5l_lcd_write_cmd(cmd);
+    while (len--) {
+        udelay(100);
+        while (!(S5L87XX_LCDCON->status & 0x2));
+        S5L87XX_LCDCON->rdata = 0;
+        while (!(S5L87XX_LCDCON->status & 1));
+        *buf++ = S5L87XX_LCDCON->dbuff >> 1;
+    }
+}
+
+static void s5l_lcd_write_config(uint32_t config) {
+    while (!(S5L87XX_LCDCON->status & 0x2));
+    udelay(1);
+    S5L87XX_LCDCON->config = config;
+}
+
+static enum s5l87xx_lcd_type s5l87xx_lcdcon_get_type(void) {
+    int retry = 3;
+    uint8_t lcd_id[4];
+    while (retry--) {
+        s5l_lcd_write_config(0x80000c20);
+        s5l_lcd_recv_cmd8(4, 4, lcd_id);
+
+        if (lcd_id[1] == 0x58) return S5L87XX_LCD_TYPE_58XX;
+        else if (lcd_id[1] == 0x38) {
+            if      (lcd_id[2] == 0xb3) return S5L87XX_LCD_TYPE_38B3;
+            else if (lcd_id[2] == 0xc4) return S5L87XX_LCD_TYPE_38C4;
+            else if (lcd_id[2] == 0xd5) return S5L87XX_LCD_TYPE_38D5;
+            else if (lcd_id[2] == 0xe6) return S5L87XX_LCD_TYPE_38E6;
+        }
+    }
+
+    return S5L87XX_LCD_TYPE_UNKNOWN;
+}
+
+void s5l87xx_lcd_init(void) {
+    debug("s5l87xx_lcd_init\n");
+    s5l87xx_enable_clkgate("lcd");
+
+    S5L87XX_LCDCON->config = 0x81100db8;
+    S5L87XX_LCDCON->phtime = 0x33;
+    
+    enum s5l87xx_lcd_type type = s5l87xx_lcdcon_get_type();
+    const char* types = "UNKNOWN";
+    switch (type) {
+    case S5L87XX_LCD_TYPE_38C4:
+        types = "38c4";
+    case S5L87XX_LCD_TYPE_38B3:
+        types = "38b3";
+    case S5L87XX_LCD_TYPE_38D5:
+        types = "38d5";
+    case S5L87XX_LCD_TYPE_38E6:
+        types = "38e6";
+    case S5L87XX_LCD_TYPE_58XX:
+        types = "58xx";
+    default:
+        break;
+    }
+    debug("%s: detected LCD type %s (%d)\n", __func__, types, type);
+}
+
+// GPIO Functions and Definitions
+
+#define PCON(i)       (*((uint32_t volatile*)(0x3cf00000 + ((i) << 5))))
+#define PDAT(i)       (*((uint32_t volatile*)(0x3cf00004 + ((i) << 5))))
+#define PUNA(i)       (*((uint32_t volatile*)(0x3cf00008 + ((i) << 5))))
+#define PUNB(i)       (*((uint32_t volatile*)(0x3cf0000c + ((i) << 5))))
+#define PUNC(i)       (*((uint32_t volatile*)(0x3cf00010 + ((i) << 5))))
+
+void s5l87xx_gpio_init(void) {
+    debug("s5l87xx_gpio_init\n");
+    static uint32_t gpio_data[] = {
+        0xE322222F, 0xEEEEEE00, 0x2332EEEE, 0x3333E222,
+        0xEEE33333, 0x3EE0EEEE, 0x0F00EE33, 0xEEEEEEE0,
+        0x22222222, 0x22222222, 0x33322222, 0xEEEEEEEE,
+        0xEEEEEEEE, 0xEEEEEEEE, 0xEE2222EE, 0xEEEE0EEE,
+    };
+
+    for (int i = 0; i < 16; i++) {
+        PCON(i) = gpio_data[i];
+        PUNB(i) = 0;
+        PUNC(i) = 0;
+    }
+}
+
+// Buscon Functions and Definitions
 
 struct s5l87xx_buscon {
     uint32_t unk[3];
     uint32_t remap;
 };
-
-struct s5l87xx_lcdcon {
-    uint32_t con;    // 0x00
-    uint32_t cmd;    // 0x04
-    uint32_t unk1;   // 0x08
-    uint32_t unk2;   // 0x0C
-    uint32_t ack;    // 0x10
-    uint32_t read;   // 0x14
-    uint32_t unk3;   // 0x18
-    uint32_t status; // 0x1C
-    uint32_t unk[8]; // 0x20
-    uint32_t write;  // 0x40
-};
-
-#define S5L87XX_LCDCON ((volatile struct s5l87xx_lcdcon *)0x38300000)
-
-static void s5l87xx_lcdcon_read_byte(uint8_t *out) {
-    udelay(100);
-    writel(0, &S5L87XX_LCDCON->ack);
-
-    uint32_t status;
-    do {
-        status = readl(&S5L87XX_LCDCON->status);
-    } while((status & 1) == 0);
-
-    udelay(100);
-
-    uint32_t data = readl(&S5L87XX_LCDCON->read);
-    if (out != NULL) {
-        *out = (data >> 1);
-    }
-}
-
-static void s5l87xx_lcdcon_wait_ready() {
-    debug("%s: start...\n", __func__);
-    uint32_t status;
-    do {
-        status = readl(&S5L87XX_LCDCON->status);
-    } while((status & (1<<4)) != 0);
-    debug("%s: done.\n", __func__);
-}
-
-static void s5l87xx_lcdcon_transact_read(uint32_t cmd, uint32_t len, uint8_t *out) {
-    writel(0x1000c20, &S5L87XX_LCDCON->con);
-    s5l87xx_lcdcon_wait_ready();
-    writel(cmd, &S5L87XX_LCDCON->cmd);
-
-    // Discard first byte???
-    s5l87xx_lcdcon_read_byte(out);
-
-    for (uint32_t i = 0; i < len; i++) {
-        s5l87xx_lcdcon_read_byte(out);
-        debug("%s: out: %02x\n", __func__, *out);
-        out++;
-    }
-}
-
-enum s5l87xx_lcd_type {
-    S5L87XX_LCD_TYPE_UNSUPPORTED = 0,
-    S5L87XX_LCD_TYPE_48C4 = 1,
-    S5L87XX_LCD_TYPE_38B3 = 2,
-    S5L87XX_LCD_TYPE_38F7 = 4
-};
-
-static enum s5l87xx_lcd_type s5l87xx_lcdcon_get_type(void) {
-    uint8_t id[3] = {0};
-    s5l87xx_lcdcon_transact_read(4, 3, id);
-    if (id[0] == 0x48 && id[1] == 0xc4) {
-        return S5L87XX_LCD_TYPE_48C4;
-    }
-    if (id[0] == 0x38) {
-        if (id[1] == 0xb3) {
-            return S5L87XX_LCD_TYPE_38B3;
-        }
-        if (id[1] == 0xf7) {
-            return S5L87XX_LCD_TYPE_38F7;
-        }
-    }
-    return S5L87XX_LCD_TYPE_UNSUPPORTED;
-}
-
-void s5l87xx_lcd_init(void) {
-    enum s5l87xx_lcd_type type = s5l87xx_lcdcon_get_type();
-    const char* types = "UNKNOWN";
-    switch (type) {
-    case S5L87XX_LCD_TYPE_48C4:
-        types = "48c4";
-    case S5L87XX_LCD_TYPE_38B3:
-        types = "38b3";
-    case S5L87XX_LCD_TYPE_38F7:
-        types = "38f7";
-    }
-    debug("%s: detected LCD type %s (%d)\n", __func__, types, type);
-}
 
 enum s5l87xx_buscon_remap {
     S5L87XX_BUSCON_REMAP_ENABLE = 1,
@@ -236,18 +295,28 @@ static void s5l87xx_buscon_remap_sdram(void) {
     buscon->remap = S5L87XX_BUSCON_REMAP_ENABLE;
 }
 
+// OTG PHY Functions and Definitions
+
+struct s5l87xx_otgphy {
+    uint32_t pwr;
+    uint32_t clk;
+    uint32_t rstcon;
+    uint32_t unk3;
+    uint32_t unk1;
+    uint32_t unk2;
+};
+
 static void s5l87xx_otgphy_off(void) {
     debug("s5l87xx_otgphy: turning off\n");
     volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)0x3c400000;
-    otgphy->pwr = 0xff;
+    otgphy->pwr = 0xf;
     mdelay(10);
-    otgphy->rstcon = 0xff;
-    mdelay(10);
-    otgphy->unkcon = 4;
+    otgphy->rstcon = 0x7;
 }
 
 static void s5l87xx_otgphy_on(void) {
     // TODO(q3k): lmao
+    s5l87xx_gpio_init();
     s5l87xx_lcd_init();
 
     debug("s5l87xx_otgphy: turning on\n");
@@ -258,12 +327,14 @@ static void s5l87xx_otgphy_on(void) {
     volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)0x3c400000;
     otgphy->pwr = 0;
     mdelay(10);
-    otgphy->rstcon = 1;
+    otgphy->unk1 = 1;
+    otgphy->unk2 = 0xe3f;
+    otgphy->rstcon = 1; // Assert Software Reset
     mdelay(10);
     otgphy->rstcon = 0;
     mdelay(10);
-    otgphy->unkcon = 6;
-    otgphy->con = 1;
+    otgphy->unk3 = 0x600;
+    otgphy->clk = 0;
     mdelay(400);
 }
 
@@ -274,6 +345,17 @@ void otg_phy_init(void *unused) {
 void otg_phy_off(void *unused) {
     s5l87xx_otgphy_off();
 }
+
+// Timer Functions and Definitions
+
+struct s5l87xx_timer {
+    uint32_t con;     // 0x000
+    uint32_t cmd;     // 0x004
+    uint32_t data0;   // 0x008
+    uint32_t data1;   // 0x00c
+    uint32_t pre;     // 0x010
+    uint32_t cnt;     // 0x014
+};
 
 enum s5l87xx_timer_id {
     //  Timers A, B, C, D: 16-bit
@@ -376,22 +458,19 @@ static uint32_t s5l87xx_timer_read(enum s5l87xx_timer_id id) {
     return timer->cnt;
 }
 
-int timer_init(void)
-{
+int timer_init(void) {
     s5l87xx_timer_configure_interval(S5L87XX_TIMER_F);
     s5l87xx_timer_start(S5L87XX_TIMER_F);
 
     return 0;
 }
 
-unsigned long timer_read_counter(void)
-{
+unsigned long timer_read_counter(void) {
     return s5l87xx_timer_read(S5L87XX_TIMER_F);
 }
 
 // TODO(q3k): move board early init to board
-int board_early_init_f(void)
-{
+int board_early_init_f(void) {
     debug("board_early_init_f\n");
     // HACKHACKHACK add a pmctrl to linux
     // needed for timer c0..???
@@ -416,8 +495,7 @@ int board_early_init_f(void)
 
 
 #ifdef CONFIG_DEBUG_UART_BOARD_INIT
-void board_debug_uart_init(void)
-{
+void board_debug_uart_init(void) {
     s5l87xx_enable_clkgate("uart0");
 
     // Enable GPIO pins on N5G.
