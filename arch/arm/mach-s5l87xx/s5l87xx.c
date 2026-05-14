@@ -14,45 +14,61 @@ typedef struct {
 #define S5L87XX_CLKCON ((volatile s5l87xx_clkcon *)0x3C500000)
 
 typedef struct {
+    uint8_t gate;
+    uint8_t bit;
+} s5l87xx_clkgate_index; 
+
+typedef struct {
     char *id;
-    uint32_t clkgate1;
+    s5l87xx_clkgate_index clkgate1;
     // Some of the clockgate mappings have two clockgates. If so, this field will be non-zero.
-    uint32_t clkgate2;
+    s5l87xx_clkgate_index clkgate2;
 } s5l87xx_clkgate_mapping; 
 
 static const s5l87xx_clkgate_mapping *s5l87xx_clkgate_mappings[] = {
-  &(s5l87xx_clkgate_mapping) { .id = "sha", .clkgate1 = 0, },
-  &(s5l87xx_clkgate_mapping) { .id = "lcd", .clkgate1 = 1, },
-  &(s5l87xx_clkgate_mapping) { .id = "usbotg", .clkgate1 = 2, },
-  &(s5l87xx_clkgate_mapping) { .id = "smx", .clkgate1 = 3, },
-  &(s5l87xx_clkgate_mapping) { .id = "sm1", .clkgate1 = 4, },
-  &(s5l87xx_clkgate_mapping) { .id = "ata", .clkgate1 = 5, },
-  &(s5l87xx_clkgate_mapping) { .id = "nand", .clkgate1 = 8, },
-  &(s5l87xx_clkgate_mapping) { .id = "sdci", .clkgate1 = 9, },
-  &(s5l87xx_clkgate_mapping) { .id = "aes", .clkgate1 = 10, },
-  &(s5l87xx_clkgate_mapping) { .id = "nandecc", .clkgate1 = 12, },
-  &(s5l87xx_clkgate_mapping) { .id = "dmac0", .clkgate1 = 25, },
-  &(s5l87xx_clkgate_mapping) { .id = "dmac1", .clkgate1 = 26, },
-  &(s5l87xx_clkgate_mapping) { .id = "rom", .clkgate1 = 30, },
-  &(s5l87xx_clkgate_mapping) { .id = "rtc", .clkgate1 = 32, },
-  &(s5l87xx_clkgate_mapping) { .id = "cwheel", .clkgate1 = 33, },
-  &(s5l87xx_clkgate_mapping) { .id = "spi0", .clkgate1 = 34, },
-  &(s5l87xx_clkgate_mapping) { .id = "usbphy", .clkgate1 = 35, },
-  &(s5l87xx_clkgate_mapping) { .id = "i2c0", .clkgate1 = 36, },
-  &(s5l87xx_clkgate_mapping) { .id = "timer0", .clkgate1 = 37, },
-  &(s5l87xx_clkgate_mapping) { .id = "i2c1", .clkgate1 = 38, },
-  &(s5l87xx_clkgate_mapping) { .id = "i2s0", .clkgate1 = 39, },
-  &(s5l87xx_clkgate_mapping) { .id = "uart0", .clkgate1 = 41, },
-  &(s5l87xx_clkgate_mapping) { .id = "i2s1", .clkgate1 = 42, },
-  &(s5l87xx_clkgate_mapping) { .id = "spi1", .clkgate1 = 43, },
-  &(s5l87xx_clkgate_mapping) { .id = "gpio", .clkgate1 = 44, },
-  &(s5l87xx_clkgate_mapping) { .id = "chipid", .clkgate1 = 46, },
-  &(s5l87xx_clkgate_mapping) { .id = "i2s2", .clkgate1 = 47, },
-  &(s5l87xx_clkgate_mapping) { .id = "spi2", .clkgate1 = 48, },
-  NULL
+    &(s5l87xx_clkgate_mapping) {
+        .id = "timer0", .clkgate1 = { 1, 5 }, .clkgate2 = { 9, 0 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "timer1", .clkgate1 = { 1, 23 }, .clkgate2 = { 9, 1 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "timer2", .clkgate1 = { 1, 24 }, .clkgate2 = { 9, 2 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "timer3", .clkgate1 = { 1, 25 }, .clkgate2 = { 9, 3 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "timer4", .clkgate1 = { 1, 26 }, .clkgate2 = { 9, 4 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "timer5", .clkgate1 = { 1, 27 }, .clkgate2 = { 9, 5 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "timer6", .clkgate1 = { 1, 28 }, .clkgate2 = { 9, 6 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "timer7", .clkgate1 = { 4, 5 }, .clkgate2 = { 9, 22 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "timer8", .clkgate1 = { 4, 6 }, .clkgate2 = { 9, 23 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "uart0", .clkgate1 = { 1, 9 }, .clkgate2 = { 9, 7 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "usb-otg", .clkgate1 = { 0, 2 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "usb2-phy", .clkgate1 = { 1, 3 },
+    },
+    NULL,
 };
 
-#define PWRCON(i)    (*((uint32_t volatile*)(0x3C500048 + 4*(i))))
+static void s5l87xx_enable_clkgate_bit(uint8_t gate, uint8_t bit) {
+    uint32_t mask = ~(((uint32_t) 1) << bit);
+    S5L87XX_CLKCON->gates[gate] &= mask;
+}
 
 static void s5l87xx_enable_clkgate(const char *id) {
     s5l87xx_clkgate_mapping const **mapping = s5l87xx_clkgate_mappings;
@@ -64,10 +80,10 @@ static void s5l87xx_enable_clkgate(const char *id) {
         }
 
         debug("s5l87xx: ungating %s\n", id);
-        uint32_t gate = (*mapping)->clkgate1;
-        int i = (gate >> 5);
-        uint32_t bit = 1 << (gate & 0x1f);
-        PWRCON(i) &= ~bit;
+        s5l87xx_enable_clkgate_bit(m->clkgate1.gate, m->clkgate1.bit);
+        if ((m->clkgate2.gate != 0) && (m->clkgate2.bit != 0)) {
+            s5l87xx_enable_clkgate_bit(m->clkgate2.gate, m->clkgate2.bit);
+        }
         return;
     }
     panic("s5l87xx_enable_clkgate: unknown id %s", id);
@@ -271,7 +287,7 @@ enum s5l87xx_timer_id {
     S5L87XX_TIMER_F = 5,
     S5L87XX_TIMER_G = 6,
     S5L87XX_TIMER_H = 7,
-    // S5L87XX_TIMER_I = 8,
+    S5L87XX_TIMER_I = 8,
 };
 
 enum s5l87xx_timer_cmd {
@@ -291,15 +307,15 @@ static struct s5l87xx_timer *s5l87xx_timer_registers(enum s5l87xx_timer_id id) {
     case S5L87XX_TIMER_D:
         return (struct s5l87xx_timer *)0x3c700060;
     case S5L87XX_TIMER_E:
-        return (struct s5l87xx_timer *)0x3c7000a0;
+        return (struct s5l87xx_timer *)0x3c700080;
     case S5L87XX_TIMER_F:
-        return (struct s5l87xx_timer *)0x3c7000c0;
+        return (struct s5l87xx_timer *)0x3c7000a0;
     case S5L87XX_TIMER_G:
-        return (struct s5l87xx_timer *)0x3c7000e0;
+        return (struct s5l87xx_timer *)0x3c7000c0;
     case S5L87XX_TIMER_H:
+        return (struct s5l87xx_timer *)0x3c7000e0;
+    case S5L87XX_TIMER_I:
         return (struct s5l87xx_timer *)0x3c700100;
-    // case S5L87XX_TIMER_I:
-    //     return (struct s5l87xx_timer *)0x3c700100;
     default:
         panic("requested invalid timer id %d", id);
     }
@@ -323,8 +339,8 @@ static const char* s5l87xx_timer_clockgate(enum s5l87xx_timer_id id) {
         return "timer6";
     case S5L87XX_TIMER_H:
         return "timer7";
-    // case S5L87XX_TIMER_I:
-    //     return "timer8";
+    case S5L87XX_TIMER_I:
+        return "timer8";
     default:
         panic("requested invalid timer id %d", id);
     }
@@ -332,7 +348,7 @@ static const char* s5l87xx_timer_clockgate(enum s5l87xx_timer_id id) {
 
 static void s5l87xx_timer_configure_interval(enum s5l87xx_timer_id id) {
     debug("s5l87xx_timer: configuring %d in interval mode\n", id);
-    s5l87xx_enable_clkgate("timer0");
+    s5l87xx_enable_clkgate(s5l87xx_timer_clockgate(id));
 
     volatile struct s5l87xx_timer *timer = s5l87xx_timer_registers(id);
 
@@ -379,7 +395,7 @@ int board_early_init_f(void)
     debug("board_early_init_f\n");
     // HACKHACKHACK add a pmctrl to linux
     // needed for timer c0..???
-    // s5l87xx_enable_clkgate("timer3");
+    s5l87xx_enable_clkgate("timer3");
     // HACKHACKHACK
 
     // Disable all VIC interrupts.
@@ -389,8 +405,8 @@ int board_early_init_f(void)
     *vic0_enclr = 0xffffffff;
     *vic1_enclr = 0xffffffff;
 
-    // s5l87xx_enable_clkgate("usb-otg");
-    // s5l87xx_enable_clkgate("usb2-phy");
+    s5l87xx_enable_clkgate("usb-otg");
+    s5l87xx_enable_clkgate("usb2-phy");
 
     // Disable USB suspend. TODO(q3k): move this to DWC2?
     volatile uint32_t *pcgcctl = (uint32_t *)0x38400e00;
@@ -398,8 +414,16 @@ int board_early_init_f(void)
     return 0;
 }
 
-void board_debug_uart_init(void) {
-    PWRCON(1) &= ~(1 << (41 - 32));
+
+#ifdef CONFIG_DEBUG_UART_BOARD_INIT
+void board_debug_uart_init(void)
+{
+    s5l87xx_enable_clkgate("uart0");
+
+    // Enable GPIO pins on N5G.
     static volatile uint32_t *gpio = (uint32_t *)0x3cf00000;
-    *gpio = (*gpio & 0xff00ffff) | 0x00220000;
+    *gpio &= 0xff00ffff;
+    *gpio |= 0x00220000;
 }
+
+#endif
