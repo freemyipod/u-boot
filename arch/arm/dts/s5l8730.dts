@@ -16,14 +16,14 @@
 
     cpus {
         cpu@0 {
-            compatible = "arm,arm1176jzf-s";
+            compatible = "arm,arm926ejs";
             device_type = "cpu";
         };
     };
 
     memory {
         device_type = "memory";
-        reg = <0x08000000 0x04000000>;
+        reg = <0x08000000 0x01000000>;
     };
 
 
@@ -33,7 +33,7 @@
     };
 
     chosen {
-        stdout-path = "serial0:115200n8";
+        stdout-path = "serial0:9600n8";
     };
 
     chipid: chipid {
@@ -95,14 +95,14 @@
     clkref: clock-ref {
         compatible = "fixed-clock";
         #clock-cells = <0>;
-        clock-frequency = <140000000>;
+        clock-frequency = <12000000>;
         clock-output-names = "clkref";
         u-boot,dm-pre-reloc;
     };
 
     serial@3cc00000 {
         compatible = "apple,s5l-uart";
-        reg = <0x3cc00000 0x3c>;
+        reg = <0x3cc00000 0x4000>;
         id = <0>;
         clocks = <&clkref>, <&clkref>;
         clock-names = "uart", "clk_uart_baud0";

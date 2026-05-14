@@ -703,7 +703,7 @@ config ARCH_EXYNOS
 
 config ARCH_S5L87XX
 	bool "Samsung S5L87XX"
-	select CPU_ARM1176
+	select CPU_ARM926EJS
 	select DM
 	select DM_GPIO
 	select DM_SERIAL

@@ -84,12 +84,20 @@ static const int udivslot[] = {
 static void __maybe_unused s5p_serial_init(struct s5p_uart *uart)
 {
 	/* enable FIFOs, auto clear Rx FIFO */
-	writel(0x3, &uart->ufcon);
+
+	writel(0, &uart->ucon);
+	writel(0, &uart->ulcon);
+	writel(0, &uart->umcon);
+	writel(6, &uart->ufcon);
+	writel(~0, &uart->utrstat);
+	writel(0, &uart->ubrdiv);
+
+	writel(7, &uart->ufcon);
 	writel(0, &uart->umcon);
 	/* 8N1 */
 	writel(0x3, &uart->ulcon);
 	/* No interrupts, no DMA, pure polling */
-	writel(0x245, &uart->ucon);
+	writel(0x5 | (1 << 10), &uart->ucon);
 }
 
 static void __maybe_unused s5p_serial_baud(struct s5p_uart *uart, u8 reg_width,
@@ -97,16 +105,16 @@ static void __maybe_unused s5p_serial_baud(struct s5p_uart *uart, u8 reg_width,
 {
 	u32 val;
 
-	val = uclk / baudrate;
+	// val = uclk / baudrate;
 
-	writel(val / 16 - 1, &uart->ubrdiv);
+	writel(12, &uart->ubrdiv);
 
-	if (s5p_uart_divslot())
-		writew(udivslot[val % 16], &uart->rest.slot);
-	else if (reg_width == 4)
-		writel(val % 16, &uart->rest.value);
-	else
-		writeb(val % 16, &uart->rest.value);
+	// if (s5p_uart_divslot())
+	// 	writew(udivslot[val % 16], &uart->rest.slot);
+	// else if (reg_width == 4)
+	// 	writel(val % 16, &uart->rest.value);
+	// else
+	// 	writeb(val % 16, &uart->rest.value);
 }
 
 #ifndef CONFIG_SPL_BUILD
@@ -125,7 +133,7 @@ int s5p_serial_setbrg(struct udevice *dev, int baudrate)
 		return ret;
 	uclk = clk_get_rate(&clk);
 	// TODO(q3k): unhack this
-	uclk = 140000000;
+	uclk = 12000000;
 #else
 	uclk = get_uart_clk(plat->port_id);
 #endif
@@ -288,17 +296,10 @@ static inline void _debug_uart_init(void)
 #endif
 }
 
-static inline void _debug_uart_putc(int ch)
-{
+static inline void _debug_uart_putc(char ch) {
 	struct s5p_uart *uart = (struct s5p_uart *)CONFIG_VAL(DEBUG_UART_BASE);
-
-#if CONFIG_IS_ENABLED(ARCH_APPLE)
-	while (readl(&uart->ufstat) & S5L_TX_FIFO_FULL);
-	writel(ch, &uart->utxh);
-#else
-	while (readl(&uart->ufstat) & S5P_TX_FIFO_FULL);
+	while ((readl(&uart->ufstat) >> 4) & 0xF);
 	writeb(ch, &uart->utxh);
-#endif
 }
 
 DEBUG_UART_FUNCS

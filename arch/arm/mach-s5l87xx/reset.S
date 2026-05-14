@@ -6,8 +6,8 @@
 
 ENTRY(relocate_vectors)
     /* Remap SRAM to 00000000. */
-    ldr r0, =0x3e00000c
-    mov r1, #3 /* REMAP_SRAM | REMAP_ENABLE */
+    ldr r0, =0x38200000
+    ldr r1, =0x1000100D
     str r1, [r0]
 
     /* Copy vectors to 00000000. */
