@@ -484,6 +484,9 @@ int board_early_init_f(void) {
     // Linux needs timer3 ungated for pmctrl.
     s5l87xx_enable_clkgate("timer3");
 
+    // I2C0 carries the PMU; Linux needs it clocked.
+    s5l87xx_enable_clkgate("i2c0");
+
     // Disable all VIC interrupts before U-Boot configures them.
     static volatile uint32_t *vic0_enclr = (uint32_t *)0x38e00014;
     static volatile uint32_t *vic1_enclr = (uint32_t *)0x38e01014;
