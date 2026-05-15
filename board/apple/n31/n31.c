@@ -39,13 +39,45 @@ int print_cpuinfo(void)
 void board_gpio_init(void) {
     uint32_t value;
 
-    value = readl(S5L87XX_GPIO_BASE + 0x140);
-    value |= 0x22000;
-    writel(value, S5L87XX_GPIO_BASE + 0x140);
+    // UART0: pad 0, rx pin 4, tx pin 5, fn 2
+    value = readl(S5L87XX_PCON(0));
+    value &= S5L87XX_PCON_PINS_CLEAR_FN(4, 5);
+    value |= S5L87XX_PCON_PINS_SET_FN(4, 5, 0x2);
+    writel(value, S5L87XX_PCON(0));
     
-    value = readl(S5L87XX_GPIO_BASE + 0x154);
-    value |= 0x18;
-    writel(value, S5L87XX_GPIO_BASE + 0x154);
+    value = readl(S5L87XX_PPIE(0));
+    value |= BIT(4) | BIT(5);
+    writel(value, S5L87XX_PPIE(0));
+
+    // UART1: pad 9, rx pin 6, tx pin 7, fn 2
+    value = readl(S5L87XX_PCON(9));
+    value &= S5L87XX_PCON_PINS_CLEAR_FN(6, 7);
+    value |= S5L87XX_PCON_PINS_SET_FN(6, 7, 0x2);
+    writel(value, S5L87XX_PCON(9));
+
+    value = readl(S5L87XX_PPIE(9));
+    value |= BIT(6) | BIT(7);
+    writel(value, S5L87XX_PPIE(9));
+
+    // UART2: pad 8, rx pin 2, tx pin 3, fn 2
+    value = readl(S5L87XX_PCON(10));
+    value &= S5L87XX_PCON_PINS_CLEAR_FN(2, 3);
+    value |= S5L87XX_PCON_PINS_SET_FN(2, 3, 0x2);
+    writel(value, S5L87XX_PCON(10));
+
+    value = readl(S5L87XX_PPIE(10));
+    value |= BIT(2) | BIT(3);
+    writel(value, S5L87XX_PPIE(10));
+
+    // UART3: pad 10, rx pin 3, tx pin 4, fn 2
+    value = readl(S5L87XX_PCON(10));
+    value &= S5L87XX_PCON_PINS_CLEAR_FN(3, 4);
+    value |= S5L87XX_PCON_PINS_SET_FN(3, 4, 0x2);
+    writel(value, S5L87XX_PCON(10));
+
+    value = readl(S5L87XX_PPIE(10));
+    value |= BIT(3) | BIT(4);
+    writel(value, S5L87XX_PPIE(10));
 }
 
 // UART RX line 0x02000
@@ -57,20 +89,20 @@ void board_clock_init(void) {
     // writel(0x1BA585, S5L87XX_PWRCON(0));
     
     value = readl(S5L87XX_PWRCON(1));
-    value &= ~(1<<9);   // UART0
-    value &= ~(1<<29);  // UART1
-    value &= ~(1<<30);  // UART2
-    value &= ~(1<<31);  // UART3
+    value &= ~BIT(9);   // UART0
+    value &= ~BIT(29);  // UART1
+    value &= ~BIT(30);  // UART2
+    value &= ~BIT(31);  // UART3
     writel(value, S5L87XX_PWRCON(1));
 
     // writel(0x1AF1, S5L87XX_PWRCON(2));
     // writel(0x3C0FC, S5L87XX_PWRCON(3));
 
     value = readl(S5L87XX_PWRCON(4));
-    value &= ~(1<<7);   // UART0
-    value &= ~(1<<8);   // UART1
-    value &= ~(1<<9);   // UART2
-    value &= ~(1<<10);  // UART3
+    value &= ~BIT(7);   // UART0
+    value &= ~BIT(8);   // UART1
+    value &= ~BIT(9);   // UART2
+    value &= ~BIT(10);  // UART3
     writel(value, S5L87XX_PWRCON(4));
 }
 

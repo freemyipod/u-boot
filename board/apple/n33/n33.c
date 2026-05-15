@@ -41,9 +41,10 @@ int print_cpuinfo(void)
 }
 
 void board_gpio_init(void) {
+    // UART0
     uint32_t gpio = readl(S5L87XX_PCON(0));
-    gpio &= 0xff00ffff;
-    gpio |= 0x00220000;
+    gpio &= S5L87XX_PCON_PINS_CLEAR_FN(4, 5);
+    gpio |= S5L87XX_PCON_PINS_SET_FN(4, 5, 0x2);
     writel(gpio, S5L87XX_PCON(0));
 }
 
