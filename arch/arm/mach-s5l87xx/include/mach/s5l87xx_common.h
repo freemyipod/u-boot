@@ -58,6 +58,10 @@
 #define S5L87XX_PCON(n) (S5L87XX_GPIO_BASE + 0x00 + (n) * 0x20))
 #define S5L87XX_PPIE(n) (S5L87XX_GPIO_BASE + 0x14 + (n) * 0x20))
 
+#define S5L87XX_PCON_PINS_CLEAR_FN(rx_pin, tx_pin) (~(GENMASK(((rx_pin + 1) * 4) - 1, rx_pin * 4) |\
+GENMASK(((tx_pin + 1) * 4) - 1, tx_pin * 4)))
+#define S5L87XX_PCON_PINS_SET_FN(rx_pin, tx_pin, fn) ((fn << (rx_pin * 4)) | (fn << (tx_pin * 4)))
+
 #define S5L87XX_BUS_BASE 0x3E000000
 
 /* Move 0xd3 value to CPSR register to enable SVC mode */
