@@ -54,8 +54,9 @@
 #define S5L87XX_WDTCON   S5L87XX_WDT_BASE			/* Control Register */
 #define S5L87XX_WDTCNT   (S5L87XX_WDT_BASE + 0x04) 	/* 11-bits internal counter */
 
-#define S5L87XX_GPIO_BASE 0x3CF00000
-#define S5L87XX_PCON0     S5L87XX_GPIO_BASE
+#define S5L87XX_GPIO_BASE    0x3CF00000
+#define S5L87XX_PCON(n) (S5L87XX_GPIO_BASE + 0x00 + (n) * 0x20))
+#define S5L87XX_PPIE(n) (S5L87XX_GPIO_BASE + 0x14 + (n) * 0x20))
 
 #define S5L87XX_BUS_BASE 0x3E000000
 

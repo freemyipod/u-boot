@@ -41,10 +41,10 @@ int print_cpuinfo(void)
 }
 
 void board_gpio_init(void) {
-    uint32_t gpio = readl(S5L87XX_PCON0);
+    uint32_t gpio = readl(S5L87XX_PCON(0));
     gpio &= 0xff00ffff;
     gpio |= 0x00220000;
-    writel(gpio, S5L87XX_PCON0);
+    writel(gpio, S5L87XX_PCON(0));
 }
 
 void board_clock_init(void) {
