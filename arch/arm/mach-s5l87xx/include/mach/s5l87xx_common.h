@@ -55,8 +55,8 @@
 #define S5L87XX_WDTCNT   (S5L87XX_WDT_BASE + 0x04) 	/* 11-bits internal counter */
 
 #define S5L87XX_GPIO_BASE    0x3CF00000
-#define S5L87XX_PCON(n) (S5L87XX_GPIO_BASE + 0x00 + (n) * 0x20))
-#define S5L87XX_PPIE(n) (S5L87XX_GPIO_BASE + 0x14 + (n) * 0x20))
+#define S5L87XX_PCON(n) (S5L87XX_GPIO_BASE + 0x00 + (n) * 0x20)
+#define S5L87XX_PPIE(n) (S5L87XX_GPIO_BASE + 0x14 + (n) * 0x20)
 
 #define S5L87XX_PCON_PINS_CLEAR_FN(rx_pin, tx_pin) (~(GENMASK(((rx_pin + 1) * 4) - 1, rx_pin * 4) |\
 GENMASK(((tx_pin + 1) * 4) - 1, tx_pin * 4)))
