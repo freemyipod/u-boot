@@ -1,12 +1,12 @@
-if TARGET_NANO3G
+if TARGET_N46
 
 config SYS_BOARD
-    default "nano3g"
+    default "n46"
 
 config SYS_VENDOR
     default "apple"
 
 config SYS_CONFIG_NAME
-    default "applenano3g"
+    default "applen46"
 
 endif

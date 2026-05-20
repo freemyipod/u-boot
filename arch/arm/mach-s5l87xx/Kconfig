@@ -4,8 +4,8 @@ choice
     prompt "S5L87XX board select"
     optional
 
-config TARGET_NANO3G
-    bool "Apple iPod Nano 3G"
+config TARGET_N46
+    bool "Apple iPod Nano 3G (N46)"
 
 config TARGET_NANO5G
     bool "Apple iPod Nano 5G"
@@ -15,7 +15,7 @@ endchoice
 config SYS_SOC
     default "s5l87xx"
 
-source "board/apple/nano3g/Kconfig"
+source "board/apple/n46/Kconfig"
 source "board/apple/nano5g/Kconfig"
 
 endif

@@ -89,7 +89,7 @@ static void __maybe_unused s5p_serial_init(struct s5p_uart *uart)
 	/* 8N1 */
 	writel(0x3, &uart->ulcon);
 	/* No interrupts, no DMA, pure polling */
-	#if CONFIG_IS_ENABLED(TARGET_NANO3G)
+	#if CONFIG_IS_ENABLED(TARGET_N46)
 		writel(0x5 | (1 << 10), &uart->ucon);
 	#else
 		writel(0x245, &uart->ucon);

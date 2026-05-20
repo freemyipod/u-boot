@@ -1055,7 +1055,7 @@ static void dwc2_set_stm32mp1_hsotg_params(struct dwc2_plat_otg_data *p)
 		p->usb_gusbcfg |= 1 << 30; /* FDMOD: Force device mode */
 }
 
-static void dwc2_set_applenano3g_hsotg_params(struct dwc2_plat_otg_data *p)
+static void dwc2_set_applen46_hsotg_params(struct dwc2_plat_otg_data *p)
 {
 	/* No STM32 SYSCFG/GGPIO on Apple hardware. */
 	p->activate_stm_id_vb_detection = false;
@@ -1219,8 +1219,8 @@ static const struct udevice_id dwc2_udc_otg_ids[] = {
 	{ .compatible = "brcm,bcm2835-usb" },
 	{ .compatible = "st,stm32mp15-hsotg",
 	  .data = (ulong)dwc2_set_stm32mp1_hsotg_params },
-	{ .compatible = "apple,ipodnano3g-usb",
-	  .data = (ulong)dwc2_set_applenano3g_hsotg_params },
+	{ .compatible = "apple,n46-usb",
+	  .data = (ulong)dwc2_set_applen46_hsotg_params },
 	{ .compatible = "apple,ipodnano5g-usb",
 	  .data = (ulong)dwc2_set_applenano5g_hsotg_params },
 	{},
