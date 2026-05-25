@@ -7,6 +7,10 @@ config TARGET_N36
     bool "Apple N36 - iPod nano (2nd generation)"
     select CPU_ARM920T
 
+config TARGET_N46
+    bool "Apple N46 - iPod nano (3rd generation)"
+    select CPU_ARM926EJS
+
 config TARGET_N33
     bool "Apple N33 - iPod nano (5th generation)"
     select CPU_ARM1176
@@ -21,6 +25,7 @@ config SYS_SOC
     default "s5l87xx"
 
 source "board/apple/n36/Kconfig"
+source "board/apple/n46/Kconfig"
 source "board/apple/n33/Kconfig"
 source "board/apple/n31/Kconfig"
 
