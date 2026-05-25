@@ -205,6 +205,9 @@ void board_debug_uart_init(void)
     gpio |= S5L87XX_PCON_PINS_SET_FN(4, 5, 0x2);
     writel(gpio, S5L87XX_PCON(0));
 
-    s5l87xx_enable_clkgate("uart0");
+    // Runs before the FDT is set up, so ungate uart0 by raw {gate, bit}
+    // ({1,9} + {9,7}) rather than the device-tree-driven name lookup.
+    s5l87xx_enable_clkgate_bit(1, 9);
+    s5l87xx_enable_clkgate_bit(9, 7);
 }
 #endif
