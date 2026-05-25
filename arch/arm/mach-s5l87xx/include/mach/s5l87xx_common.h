@@ -71,5 +71,11 @@ GENMASK(((tx_pin + 1) * 4) - 1, tx_pin * 4)))
 
 void s5l87xx_reset_cpu(void);
 void s5l87xx_enable_clkgate(const char *id);
+/*
+ * Ungate a single clock gate by raw {gate, bit}. Unlike s5l87xx_enable_clkgate()
+ * this needs no device tree, so it is safe in pre-relocation paths (e.g. the
+ * debug UART init, which runs before the FDT is set up).
+ */
+void s5l87xx_enable_clkgate_bit(uint8_t gate, uint8_t bit);
 
 #endif //S5L87XX_COMMON_H

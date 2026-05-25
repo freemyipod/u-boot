@@ -28,6 +28,21 @@
         clock-output-names = "nclk";
     };
 
+    /*
+     * Clock-gate name -> {gate, bit} table consumed by s5l87xx_enable_clkgate().
+     * Each entry is two cells: gate * 32 + bit, with 0xffffffff for an unused
+     * second gate.
+     */
+    clkgates {
+        compatible = "samsung,s5l87xx-clkgates";
+        clock-gate-names = "timer0", "timer1", "timer2", "timer3", "timer4",
+                           "timer5", "timer6", "timer7", "timer8",
+                           "uart0", "usb-otg", "usb2-phy";
+        samsung,clock-gates = <37 288>, <55 289>, <56 290>, <57 291>, <58 292>,
+                              <56 290>, <57 291>, <133 310>, <134 311>,
+                              <41 295>, <2 0xffffffff>, <35 0xffffffff>;
+    };
+
 
     // pclk: clock-ref {
     //     compatible = "fixed-clock";
