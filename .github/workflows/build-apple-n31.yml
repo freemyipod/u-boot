@@ -1,9 +1,9 @@
-name: Build U-Boot for Apple N31 - iPod nano (7th generation)
+name: Build for Apple N31 - iPod nano (7th generation)
 
 on: push
 
 jobs:
-  build:
+  build-uboot:
     runs-on: ubuntu-24.04
     container:
       image: ghcr.io/freemyipod/gcc-arm-env:main

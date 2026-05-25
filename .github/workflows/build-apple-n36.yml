@@ -1,9 +1,9 @@
-name: Build U-Boot for Apple N46 - iPod nano (3rd generation)
+name: Build for Apple N36 - iPod nano (2nd generation)
 
 on: push
 
 jobs:
-  build:
+  build-uboot:
     runs-on: ubuntu-24.04
     container:
       image: ghcr.io/freemyipod/gcc-arm-env:main
@@ -14,7 +14,7 @@ jobs:
 
       - name: Configure U-Boot
         run: |
-          make apple_n46_defconfig
+          make apple_n36_defconfig
 
       - name: Build U-Boot
         run: |
@@ -23,7 +23,7 @@ jobs:
       - name: Upload U-Boot artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: u-boot-apple-n46-artifacts
+          name: u-boot-apple-n36-artifacts
           path: |
             u-boot*
             dts/dt.dtb
