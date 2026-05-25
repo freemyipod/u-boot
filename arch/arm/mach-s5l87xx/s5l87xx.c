@@ -86,6 +86,18 @@ static const s5l87xx_clkgate_mapping *s5l87xx_clkgate_mappings[] = {
     &(s5l87xx_clkgate_mapping) {
         .id = "usb2-phy", .clkgate1 = { 1, 3 },
     },
+#if IS_ENABLED(CONFIG_TARGET_N46)
+    &(s5l87xx_clkgate_mapping) {
+        // S5L8702 has a single timer clock gate (rockbox CLOCKGATE_TIMER 37).
+        .id = "timer", .clkgate1 = { 1, 5 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "lcd", .clkgate1 = { 0, 1 },
+    },
+    &(s5l87xx_clkgate_mapping) {
+        .id = "i2c0", .clkgate1 = { 1, 4 },
+    },
+#endif
 #endif
     NULL,
 };
@@ -122,7 +134,7 @@ static void s5l87xx_enable_clkgate_bit(uint8_t gate, uint8_t bit) {
 
 void s5l87xx_enable_clkgate(const char *id) {
     s5l87xx_clkgate_mapping const **mapping = s5l87xx_clkgate_mappings;
-    while (mapping != NULL) {
+    while (*mapping != NULL) {
         const s5l87xx_clkgate_mapping *m = *mapping;
         if (strcmp(m->id, id) != 0) {
             mapping++;
@@ -293,6 +305,72 @@ static void s5l87xx_buscon_remap_sdram(void) {
 }
 #endif
 
+#if IS_ENABLED(CONFIG_TARGET_N46)
+
+// S5L8702 OTG PHY register layout, reverse-engineered from a disk mode QEMU
+// trace. Differs from the S5L8730/N36 layout, so it is kept separate.
+struct s5l8702_otgphy {
+    uint32_t pwr;        // 0x00 - power down control
+    uint32_t clk;        // 0x04 - clock select
+    uint32_t rstcon;     // 0x08 - reset control (3 bits)
+    uint32_t pad0[3];    // 0x0c-0x14
+    uint32_t bias;       // 0x18 - analog bias/trim
+    uint32_t pad1[5];    // 0x1c-0x2c  (0x28 read-only by bootrom)
+    uint32_t intfcon;    // 0x30 - interface control
+    uint32_t pad2[3];    // 0x34-0x3c
+    uint32_t phy_ctrl1;  // 0x40 - analog power stage 1
+    uint32_t phy_ctrl2;  // 0x44 - analog power stage 2
+};
+
+static void s5l87xx_otgphy_off(void) {
+    log_debug("s5l87xx_otgphy: turning off\n");
+    volatile struct s5l8702_otgphy *phy = (struct s5l8702_otgphy *)S5L87XX_PHY_BASE;
+    phy->phy_ctrl2 = 0;
+    phy->phy_ctrl1 = 0;
+    phy->rstcon = 0x7;
+    phy->pwr = 0xff;
+}
+
+static void s5l87xx_otgphy_on(void) {
+    log_debug("s5l87xx_otgphy: turning on\n");
+    s5l87xx_enable_clkgate("usb-otg");
+    s5l87xx_enable_clkgate("usb2-phy");
+
+    // Disable USB suspend.
+    volatile uint32_t *pcgcctl = (uint32_t *)(S5L87XX_OTG_BASE + 0xe00);
+    *pcgcctl = 0;
+
+    volatile struct s5l8702_otgphy *phy = (struct s5l8702_otgphy *)S5L87XX_PHY_BASE;
+    volatile uint32_t *phy_enable = (uint32_t *)(S5L87XX_PHY_BASE + 0x100);
+
+    phy->pwr    = 0x000;
+    phy->clk    = 0x000;
+    phy->bias   = 0x400;
+    phy->rstcon = 0x007;  // assert all three reset signals
+
+    // Ramp up PHY analog stage 1 incrementally (from disk mode trace).
+    phy->phy_ctrl1 = 0x300;
+    phy->phy_ctrl1 = 0x340;
+    phy->phy_ctrl1 = 0x346;
+    phy->phy_ctrl1 = 0x347;
+
+    // Ramp up PHY analog stage 2 incrementally (from disk mode trace).
+    phy->phy_ctrl2 = 0x0c00;
+    phy->phy_ctrl2 = 0x0fc0;
+    phy->phy_ctrl2 = 0x0fe0;
+    phy->phy_ctrl2 = 0x0ff0;
+    phy->phy_ctrl2 = 0x0fff;
+
+    *phy_enable = 1;      // enable PHY output
+
+    phy->rstcon  = 0x000; // deassert reset
+    phy->bias    = 0x400;
+    phy->intfcon = 0x000;
+    phy->bias    = 0x000;
+}
+
+#else
+
 static void s5l87xx_otgphy_off(void) {
     log_debug("s5l87xx_otgphy: turning off\n");
     volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)S5L87XX_PHY_BASE;
@@ -320,7 +398,7 @@ static void s5l87xx_otgphy_on(void) {
     // TODO(q3k): move this to DWC2?
     volatile uint32_t *pcgcctl = (uint32_t *)(S5L87XX_OTG_BASE + 0xe00);
     *pcgcctl = 0;
-    
+
     volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)S5L87XX_PHY_BASE;
     otgphy->pwr = 0; /* PHY: Power up */
 #if IS_ENABLED(CONFIG_TARGET_N36)
@@ -345,6 +423,8 @@ static void s5l87xx_otgphy_on(void) {
     mdelay(400);
 #endif
 }
+
+#endif
 
 void otg_phy_init(void *unused) {
     s5l87xx_otgphy_on();
@@ -411,7 +491,8 @@ static struct s5l87xx_timer *s5l87xx_timer_registers(enum s5l87xx_timer_id id) {
 }
 
 static const char* s5l87xx_timer_clockgate(enum s5l87xx_timer_id id) {
-#if IS_ENABLED(CONFIG_TARGET_N36)
+#if IS_ENABLED(CONFIG_TARGET_N36) || IS_ENABLED(CONFIG_TARGET_N46)
+    /* S5L8702 gates all timers behind a single clock gate. */
     return "timer";
 #else
     switch (id) {
