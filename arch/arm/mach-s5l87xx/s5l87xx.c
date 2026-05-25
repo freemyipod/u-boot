@@ -1,5 +1,6 @@
 #include <init.h>
 #include <asm/io.h>
+#include <dm/ofnode.h>
 #include <linux/delay.h>
 #include <asm/arch/s5l87xx_common.h>
 
@@ -12,95 +13,11 @@ typedef struct {
 
 #define S5L87XX_CLKCON ((volatile s5l87xx_clkcon *)S5L87XX_CLK_BASE)
 
-typedef struct {
-    uint8_t gate;
-    uint8_t bit;
-} s5l87xx_clkgate_index; 
-
-typedef struct {
-    char *id;
-    s5l87xx_clkgate_index clkgate1;
-    // Some of the clockgate mappings have two clockgates. If so, this field will be non-zero.
-    s5l87xx_clkgate_index clkgate2;
-} s5l87xx_clkgate_mapping; 
-
-static const s5l87xx_clkgate_mapping *s5l87xx_clkgate_mappings[] = {
-#if IS_ENABLED(CONFIG_TARGET_N36)
-    // https://freemyipod.org/wiki/Nano2G_clock_gates
-    &(s5l87xx_clkgate_mapping) {
-        .id = "timer", .clkgate1 = { 0, 4 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "uart", .clkgate1 = { 0, 8 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "usb2-phy", .clkgate1 = { 0, 14 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "usb-otg", .clkgate1 = { 1, 11 },
-    },
-#else
-    &(s5l87xx_clkgate_mapping) {
-        .id = "timer0", .clkgate1 = { 1, 5 }, .clkgate2 = { 9, 0 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "timer1", .clkgate1 = { 1, 23 }, .clkgate2 = { 9, 1 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "timer2", .clkgate1 = { 1, 24 }, .clkgate2 = { 9, 2 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "timer3", .clkgate1 = { 1, 25 }, .clkgate2 = { 9, 3 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "timer4", .clkgate1 = { 1, 26 }, .clkgate2 = { 9, 4 },
-    },
-    // clockgates don't exactly match between s5l87xx
-#if IS_ENABLED(CONFIG_TARGET_N33)
-    &(s5l87xx_clkgate_mapping) {
-        .id = "timer5", .clkgate1 = { 1, 27 }, .clkgate2 = { 9, 5 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "timer6", .clkgate1 = { 1, 28 }, .clkgate2 = { 9, 6 },
-    },
-#elif IS_ENABLED(CONFIG_TARGET_N31)
-    &(s5l87xx_clkgate_mapping) {
-        .id = "timer5", .clkgate1 = { 1, 24 }, .clkgate2 = { 9, 2 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "timer6", .clkgate1 = { 1, 25 }, .clkgate2 = { 9, 3 },
-    },
-#endif
-    &(s5l87xx_clkgate_mapping) {
-        .id = "timer7", .clkgate1 = { 4, 5 }, .clkgate2 = { 9, 22 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "timer8", .clkgate1 = { 4, 6 }, .clkgate2 = { 9, 23 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "uart0", .clkgate1 = { 1, 9 }, .clkgate2 = { 9, 7 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "usb-otg", .clkgate1 = { 0, 2 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "usb2-phy", .clkgate1 = { 1, 3 },
-    },
-#if IS_ENABLED(CONFIG_TARGET_N46)
-    &(s5l87xx_clkgate_mapping) {
-        // S5L8702 has a single timer clock gate (rockbox CLOCKGATE_TIMER 37).
-        .id = "timer", .clkgate1 = { 1, 5 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "lcd", .clkgate1 = { 0, 1 },
-    },
-    &(s5l87xx_clkgate_mapping) {
-        .id = "i2c0", .clkgate1 = { 1, 4 },
-    },
-#endif
-#endif
-    NULL,
-};
+/*
+ * Sentinel for an unused second clock gate in the device-tree
+ * "samsung,clock-gates" property. A real gate is encoded as gate * 32 + bit.
+ */
+#define S5L87XX_CLKGATE_NONE 0xffffffff
 
 void s5l87xx_reset_cpu(void) {
     svc32_mode_en();
@@ -121,7 +38,7 @@ void s5l87xx_reset_cpu(void) {
         ;	/* loop forever till reset */
 }
 
-static void s5l87xx_enable_clkgate_bit(uint8_t gate, uint8_t bit) {
+void s5l87xx_enable_clkgate_bit(uint8_t gate, uint8_t bit) {
     uint32_t mask = ~(((uint32_t) 1) << bit);
 #if IS_ENABLED(CONFIG_TARGET_N36)
     uint32_t value = readl(S5L87XX_PWRCON(gate));
@@ -132,23 +49,37 @@ static void s5l87xx_enable_clkgate_bit(uint8_t gate, uint8_t bit) {
 #endif
 }
 
-void s5l87xx_enable_clkgate(const char *id) {
-    s5l87xx_clkgate_mapping const **mapping = s5l87xx_clkgate_mappings;
-    while (*mapping != NULL) {
-        const s5l87xx_clkgate_mapping *m = *mapping;
-        if (strcmp(m->id, id) != 0) {
-            mapping++;
-            continue;
-        }
-
-        log_debug("s5l87xx: ungating %s\n", id);
-        s5l87xx_enable_clkgate_bit(m->clkgate1.gate, m->clkgate1.bit);
-        if ((m->clkgate2.gate != 0) && (m->clkgate2.bit != 0)) {
-            s5l87xx_enable_clkgate_bit(m->clkgate2.gate, m->clkgate2.bit);
-        }
+static void s5l87xx_ungate_encoded(uint32_t encoded) {
+    if (encoded == S5L87XX_CLKGATE_NONE)
         return;
-    }
-    panic("s5l87xx_enable_clkgate: unknown id %s", id);
+    s5l87xx_enable_clkgate_bit(encoded / 32, encoded % 32);
+}
+
+/*
+ * Ungate a clock by name. The name -> {gate, bit} mapping lives in the device
+ * tree under the "samsung,s5l87xx-clkgates" node ("clock-gate-names" paired
+ * with "samsung,clock-gates", two cells per gate). Works pre-relocation: it
+ * reads the flat tree directly, so callers earlier than the FDT setup (e.g.
+ * the debug UART) must use s5l87xx_enable_clkgate_bit() instead.
+ */
+void s5l87xx_enable_clkgate(const char *id) {
+    ofnode node = ofnode_by_compatible(ofnode_null(),
+                                       "samsung,s5l87xx-clkgates");
+    if (!ofnode_valid(node))
+        panic("s5l87xx_enable_clkgate: no clkgates node in device tree");
+
+    int idx = ofnode_stringlist_search(node, "clock-gate-names", id);
+    if (idx < 0)
+        panic("s5l87xx_enable_clkgate: unknown id %s", id);
+
+    uint32_t gate1, gate2;
+    if (ofnode_read_u32_index(node, "samsung,clock-gates", idx * 2, &gate1) ||
+        ofnode_read_u32_index(node, "samsung,clock-gates", idx * 2 + 1, &gate2))
+        panic("s5l87xx_enable_clkgate: malformed gates for %s", id);
+
+    log_debug("s5l87xx: ungating %s\n", id);
+    s5l87xx_ungate_encoded(gate1);
+    s5l87xx_ungate_encoded(gate2);
 }
 
 struct s5l87xx_uart {

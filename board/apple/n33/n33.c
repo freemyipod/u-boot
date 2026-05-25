@@ -86,7 +86,9 @@ void board_debug_uart_init(void)
     /* Enable GPIO pins */
     board_gpio_init();
     
-    /* Enable UART clocking */
-    s5l87xx_enable_clkgate("uart0");
+    /* Enable UART clocking. Runs before the FDT is set up, so ungate uart0 by
+     * raw {gate, bit} ({1,9} + {9,7}) rather than the device-tree name lookup. */
+    s5l87xx_enable_clkgate_bit(1, 9);
+    s5l87xx_enable_clkgate_bit(9, 7);
 }
 #endif
