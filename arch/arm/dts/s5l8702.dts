@@ -1,0 +1,143 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Apple iPod nano (3rd generation) - S5L8702
+ */
+
+ /dts-v1/;
+
+#include "skeleton.dtsi"
+
+/ {
+    model = "Apple iPod nano (3rd generation)";
+    compatible = "samsung,s5l8702", "samsung,s5l87xx";
+
+    cpus {
+        cpu@0 {
+            compatible = "arm,arm926ejs";
+            device_type = "cpu";
+        };
+    };
+
+    memory {
+        device_type = "memory";
+        reg = <0x08000000 0x02000000>;
+    };
+
+
+    aliases {
+        serial0 = "/serial@3cc00000";
+        console = "/serial@3cc00000";
+    };
+
+    chosen {
+        stdout-path = "serial0:57600n8";
+    };
+
+    chipid: chipid {
+        compatible = "samsung,s5l87xx-chipid";
+        reg = <0x3d100000 0x1000>;
+    };
+
+    syscon: syscon {
+        compatible = "samsung,s5l87xx-syscon";
+        reg = <0x3c500000 0x1000>;
+    };
+
+    vic0: interrupt-controller@38e00000 {
+        compatible = "arm,pl192-vic";
+        interrupt-controller;
+        reg = <0x38e00000 0x1000>;
+        #interrupt-cells = <1>;
+    };
+
+    vic1: interrupt-controller@38e01000 {
+        compatible = "arm,pl192-vic";
+        interrupt-controller;
+        reg = <0x38e01000 0x1000>;
+        #interrupt-cells = <1>;
+    };
+
+    dmac0: dma-controller@38200000 {
+        compatible = "arm,pl080", "arm,primecell";
+        reg = <0x38200000 0x1000>;
+        #dma-cells = <1>;
+        interrupt-parent = <&vic0>;
+        interrupts = <16>;
+        clocks = <&clkref>;
+        clock-names = "apb_pclk";
+    };
+
+    dmac1: dma-controller@38700000 {
+        compatible = "arm,pl080", "arm,primecell";
+        reg = <0x38700000 0x1000>;
+        #dma-cells = <1>;
+        interrupt-parent = <&vic0>;
+        interrupts = <17>;
+        clocks = <&clkref>;
+        clock-names = "apb_pclk";
+    };
+
+    lcdcon: lcdcon@38300000 {
+        compatible = "samsung,s5l8730-lcdcon";
+        reg = <0x38300000 0x10000>;
+    };
+
+    timer0: timer@3c7000c0 {
+        compatible = "samsung,s5l87xx-pwm";
+        reg = <0x3c700000 0x20000>;
+        interrupt-parent = <&vic0>;
+        interrupts = <7>;
+    };
+
+    clkref: clock-ref {
+        compatible = "fixed-clock";
+        #clock-cells = <0>;
+        clock-frequency = <12000000>;
+        clock-output-names = "clkref";
+        u-boot,dm-pre-reloc;
+    };
+
+    serial@3cc00000 {
+        compatible = "apple,s5l-uart";
+        reg = <0x3cc00000 0x3c>;
+        id = <0>;
+        clocks = <&clkref>, <&clkref>;
+        clock-names = "uart", "clk_uart_baud0";
+        u-boot,dm-pre-reloc;
+        interrupt-parent = <&vic0>;
+        interrupts = <24>;
+    };
+
+    i2c0@3c600000 {
+        compatible = "samsung,s5l8730-i2c";
+        reg = <0x3c600000 0x1000>;
+        samsung,i2c-slave-addr = <0x40>;
+        interrupt-parent = <&vic0>;
+        interrupts = <21>;
+        status = "okay";
+    };
+
+    usbphy: usbphy@3c400000 {
+        compatible = "apple,s5l8730-otgphy";
+        reg = <0x3c400000 0x100>;
+        status = "okay";
+        #phy-cells = <0>;
+    };
+
+    usbotg_hs: usb@38400000 {
+        compatible = "apple,s5l87xx-usb";
+        reg = <0x38400000 0x40000>;
+        interrupt-parent = <&vic0>;
+        interrupts = <19>;
+        phys = <&usbphy>;
+        phy-names = "usb2-phy";
+        clocks = <&clkref>;
+        clock-names = "otg";
+        g-rx-fifo-size = <256>;
+        g-np-tx-fifo-size = <32>;
+        g-tx-fifo-size = <256 256 512 512 512 768 768>;
+        status = "okay";
+        dr_mode = "peripheral";
+    };
+
+};

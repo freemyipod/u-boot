@@ -97,12 +97,23 @@ static void __maybe_unused s5p_serial_init(struct s5p_uart *uart)
 	/* 8N1, no parity bit */
 	writel(ULCON_WORD_8_BIT, &uart->ulcon);
 	/* No interrupts, no DMA, pure polling */
+#if IS_ENABLED(CONFIG_TARGET_N46)
+	/*
+	 * S5L8702: the upper UCON bits are part of the clock-source select,
+	 * so the bootrom-proven value is RX/TX polling + NCLK only. Adding the
+	 * RX-error / TX-IRQ-level bits (as the other S5L targets do) shifts the
+	 * effective baud rate and produces garbage on the wire.
+	 */
+	writel(UCON_RX_IRQ_OR_POLLING | UCON_TX_IRQ_OR_POLLING | S5L_CLK_NCLK,
+	       &uart->ucon);
+#else
 	writel(UCON_RX_IRQ_OR_POLLING | UCON_TX_IRQ_OR_POLLING |
 	       UCON_RX_ERR_IRQ_EN | UCON_TX_IRQ_LEVEL, &uart->ucon);
 
 #if IS_ENABLED(CONFIG_TARGET_N31)
 	u32 val = readl(&uart->ucon);
 	writel(val | S5L_CLK_NCLK, &uart->ucon);
+#endif
 #endif
 }
 
