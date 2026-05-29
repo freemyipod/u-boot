@@ -111,7 +111,6 @@
         #clock-cells = <0>;
         clock-frequency = <12000000>;
         clock-output-names = "clkref";
-        u-boot,dm-pre-reloc;
     };
 
     serial@3cc00000 {
@@ -120,7 +119,6 @@
         id = <0>;
         clocks = <&clkref>, <&clkref>;
         clock-names = "uart", "clk_uart_baud0";
-        u-boot,dm-pre-reloc;
         interrupt-parent = <&vic0>;
         interrupts = <24>;
     };
