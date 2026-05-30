@@ -1,0 +1,34 @@
+// SPDX-License-Identifier: GPL-2.0+ OR MIT
+/*
+ * Peripherals common to Samsung S5L8702 and later SoCs
+ *
+ * Copyright The freemyipod team (freemyipod.org)
+ */
+
+#include "s5l87xx.dtsi"
+
+/ {
+	soc {
+		vic0: interrupt-controller@38e00000 {
+			compatible = "arm,pl192-vic";
+			interrupt-controller;
+			reg = <0x38e00000 0x1000>;
+			#interrupt-cells = <1>;
+		};
+
+		usbotg_hs: usb@38400000 {
+			compatible = "apple,s5l87xx-usb";
+			reg = <0x38400000 0x40000>;
+			interrupt-parent = <&vic0>;
+			interrupts = <19>;
+			phys = <&usbphy>;
+			phy-names = "usb2-phy";
+			clocks = <&clkref>;
+			clock-names = "otg";
+			g-rx-fifo-size = <256>;
+			g-np-tx-fifo-size = <32>;
+			g-tx-fifo-size = <256 256 512 512 512 768 768>;
+			dr_mode = "peripheral";
+		};
+	};
+};

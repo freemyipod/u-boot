@@ -1,0 +1,62 @@
+// SPDX-License-Identifier: GPL-2.0+ OR MIT
+/*
+ * Samsung S5L8701 SoC
+ *
+ * Other names: M1
+ *
+ * Copyright The freemyipod team (freemyipod.org)
+ */
+
+#include "s5l87xx.dtsi"
+
+/ {
+	compatible = "samsung,s5l8701", "apple,arm-platform";
+
+	chosen {
+		stdout-path = &uart0;
+	};
+
+	soc {
+		icu: interrupt-controller@39c00000 {
+			compatible = "samsung,s5l8701-icu";
+			interrupt-controller;
+			reg = <0x39c00000 0x1000>;
+			#interrupt-cells = <1>;
+		};
+
+		usbotg_hs: usb@38800000 {
+			compatible = "apple,s5l87xx-usb";
+			reg = <0x38800000 0x40000>;
+			interrupt-parent = <&icu>;
+			interrupts = <16>;
+			phys = <&usbphy>;
+			phy-names = "usb2-phy";
+			clocks = <&clkref>;
+			clock-names = "otg";
+			g-rx-fifo-size = <256>;
+			g-np-tx-fifo-size = <128>;
+			g-tx-fifo-size = <0>;
+			dr_mode = "peripheral";
+		};
+	};
+};
+
+&cpu0 {
+	compatible = "arm,arm940t";
+};
+
+&clkgates {
+	/*
+	 * Clock-gate name -> {gate, bit} table consumed by s5l87xx_enable_clkgate().
+	 * Each entry is two cells: gate * 32 + bit, with 0xffffffff for an unused
+	 * second gate. The Nano2G (S5L8701) uses single gates (PWRCON registers).
+	 * See https://freemyipod.org/wiki/Nano2G_clock_gates
+	 */
+	clock-gate-names = "timer", "uart", "usb2-phy", "usb-otg";
+	samsung,clock-gates = <4 0xffffffff>, <8 0xffffffff>,
+						  <14 0xffffffff>, <43 0xffffffff>;
+};
+
+&uart0 {
+	status = "okay";
+};
