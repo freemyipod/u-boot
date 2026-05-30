@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: GPL-2.0+ OR MIT
+/*
+ * Samsung S5L8740 SoC
+ *
+ * Other names: M2R
+ *
+ * Copyright The freemyipod team (freemyipod.org)
+ */
+
+#include "s5l87xx.dtsi"
+#include "s5l8702-common.dtsi"
+
+/ {
+	compatible = "samsung,s5l8740", "apple,arm-platform";
+
+	chosen {
+		stdout-path = &uart3;
+	};
+};
+
+&cpu0 {
+	compatible = "arm,cortex-a5";
+};
+
+&clkgates {
+	/*
+	 * Clock-gate name -> {gate, bit} table consumed by s5l87xx_enable_clkgate().
+	 * Each entry is two cells: gate * 32 + bit, with 0xffffffff for an unused
+	 * second gate.
+	 */
+	clock-gate-names = "timer0", "timer1", "timer2", "timer3", "timer4",
+					   "timer5", "timer6", "timer7", "timer8",
+					   "uart0", "usb-otg", "usb2-phy";
+	samsung,clock-gates = <37 288>, <55 289>, <56 290>, <57 291>, <58 292>,
+						  <56 290>, <57 291>, <133 310>, <134 311>,
+						  <41 295>, <2 0xffffffff>, <35 0xffffffff>;
+};
+
+&uart3 {
+	status = "okay";
+};

@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: GPL-2.0+ OR MIT
+/*
+ * Samsung S5L87xx SoC family
+ *
+ * Copyright The freemyipod team (freemyipod.org)
+ */
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu0: cpu@0 {
+			device_type = "cpu";
+			reg = <0x0>;
+		};
+	};
+
+	soc {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		clkgates: clkgates {
+			compatible = "samsung,s5l87xx-clkgates";
+		};
+
+		uart0: uart@3cc00000 {
+			compatible = "apple,s5l-uart";
+			reg = <0x3cc00000 0x3c>;
+			clocks = <&clkref>, <&clkref>;
+			clock-names = "uart", "clk_uart_baud0";
+			reg-io-width = <4>;
+			id = <0>;
+			status = "disabled";
+		};
+
+		uart1: uart@3db00000 {
+			compatible = "apple,s5l-uart";
+			reg = <0x3db00000 0x3c>;
+			clocks = <&clkref>, <&clkref>;
+			clock-names = "uart", "clk_uart_baud0";
+			reg-io-width = <4>;
+			id = <1>;
+			status = "disabled";
+		};
+
+		uart2: uart@3dc00000 {
+			compatible = "apple,s5l-uart";
+			reg = <0x3dc00000 0x3c>;
+			clocks = <&clkref>, <&clkref>;
+			clock-names = "uart", "clk_uart_baud0";
+			reg-io-width = <4>;
+			id = <2>;
+			status = "disabled";
+		};
+
+		uart3: uart@3dd00000 {
+			compatible = "apple,s5l-uart";
+			reg = <0x3dd00000 0x3c>;
+			clocks = <&clkref>, <&clkref>;
+			clock-names = "uart", "clk_uart_baud0";
+			reg-io-width = <4>;
+			id = <3>;
+			status = "disabled";
+		};
+
+		usbphy: usbphy@3c400000 {
+			compatible = "apple,s5l87xx-otgphy";
+			reg = <0x3c400000 0x100>;
+			#phy-cells = <0>;
+		};
+	};
+};

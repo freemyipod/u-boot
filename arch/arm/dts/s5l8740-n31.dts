@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: GPL-2.0+ OR MIT
+/*
+ * Apple iPod nano (7th generation)
+ *
+ * target-type: N31
+ *
+ * Copyright The freemyipod team (freemyipod.org)
+ */
+
+/dts-v1/;
+
+#include "s5l8740.dtsi"
+#include "s5l87xx-nxx.dtsi"
+
+/ {
+	compatible = "apple,n31", "samsung,s5l8740", "apple,arm-platform";
+	model = "Apple iPod nano (7th generation)";
+};
+
+&memory {
+	reg = <0x08000000 0x04000000>; /* 64 MiB SDRAM */
+};
+
+&clkref {
+	clock-frequency = <24000000>;
+};
