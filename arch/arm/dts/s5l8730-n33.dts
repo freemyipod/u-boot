@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: GPL-2.0+ OR MIT
+/*
+ * Apple iPod nano (5th generation)
+ *
+ * target-type: N33
+ *
+ * Copyright The freemyipod team (freemyipod.org)
+ */
+
+/dts-v1/;
+
+#include "s5l8730.dtsi"
+#include "s5l87xx-nxx.dtsi"
+
+/ {
+	compatible = "apple,n33", "samsung,s5l8730", "apple,arm-platform";
+	model = "Apple iPod nano (3rd generation)";
+};
+
+&memory {
+	reg = <0x08000000 0x04000000>; /* 64 MiB SDRAM */
+};
+
+&clkref {
+	clock-frequency = <140000000>;
+};

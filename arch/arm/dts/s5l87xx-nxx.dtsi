@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: GPL-2.0+ OR MIT
+/*
+ * Apple iPod nano (2nd, 3rd, 5th and 7th generation)
+ *
+ * This file contains parts common to all Apple iPod devices using the s5l87xx.
+ *
+ * target-type: N36, N46, N33, N31
+ *
+ * Copyright The freemyipod team (freemyipod.org)
+ */
+
+/ {
+	memory: memory {
+		device_type = "memory";
+	};
+
+	clkref: clock-ref {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-output-names = "clkref";
+	};
+};
