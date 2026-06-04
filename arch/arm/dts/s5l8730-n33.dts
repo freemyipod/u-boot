@@ -14,7 +14,7 @@
 
 / {
 	compatible = "apple,n33", "samsung,s5l8730", "apple,arm-platform";
-	model = "Apple iPod nano (3rd generation)";
+	model = "Apple iPod nano (5th generation)";
 };
 
 &memory {
