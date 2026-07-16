@@ -1,0 +1,8 @@
+if S5L8701
+
+config TARGET_N36
+	bool "Apple N36 - iPod nano (2nd generation)"
+
+source "board/apple/n36/Kconfig"
+
+endif
