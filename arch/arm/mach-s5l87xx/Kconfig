@@ -1,32 +1,24 @@
 if ARCH_S5L87XX
 
-choice
-    prompt "S5L87XX board select"
-
-config TARGET_N36
-    bool "Apple N36 - iPod nano (2nd generation)"
+config S5L8701
+    bool "S5L8701"
     select CPU_ARM920T
 
-config TARGET_N46
-    bool "Apple N46 - iPod nano (3rd generation)"
+config S5L8702
+    bool "S5L8702"
     select CPU_ARM926EJS
 
-config TARGET_N33
-    bool "Apple N33 - iPod nano (5th generation)"
+config S5L8730
+    bool "S5L8730"
     select CPU_ARM1176
 
-config TARGET_N31
-    bool "Apple N31 - iPod nano (7th generation)"
+config S5L8740
+    bool "S5L8740"
     select CPU_V7A
 
-endchoice
-
-config SYS_SOC
-    default "s5l87xx"
-
-source "board/apple/n36/Kconfig"
-source "board/apple/n46/Kconfig"
-source "board/apple/n33/Kconfig"
-source "board/apple/n31/Kconfig"
+source "arch/arm/mach-s5l87xx/s5l8701/Kconfig"
+source "arch/arm/mach-s5l87xx/s5l8702/Kconfig"
+source "arch/arm/mach-s5l87xx/s5l8730/Kconfig"
+source "arch/arm/mach-s5l87xx/s5l8740/Kconfig"
 
 endif
