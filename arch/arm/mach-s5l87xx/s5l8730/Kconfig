@@ -1,0 +1,8 @@
+if S5L8730
+
+config TARGET_N33
+    bool "Apple N33 - iPod nano (5th generation)"
+
+source "board/apple/n33/Kconfig"
+
+endif

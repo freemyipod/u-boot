@@ -2,7 +2,7 @@
 #include <asm/io.h>
 #include <dm/ofnode.h>
 #include <linux/delay.h>
-#include <asm/arch/s5l87xx_common.h>
+#include <asm/arch-s5l87xx/s5l87xx.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

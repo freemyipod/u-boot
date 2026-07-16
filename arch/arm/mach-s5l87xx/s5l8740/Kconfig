@@ -1,0 +1,8 @@
+if S5L8740
+
+config TARGET_N31
+    bool "Apple N31 - iPod nano (7th generation)"
+
+source "board/apple/n31/Kconfig"
+
+endif
