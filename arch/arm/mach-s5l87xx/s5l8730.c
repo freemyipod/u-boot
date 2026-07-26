@@ -6,3 +6,8 @@ int print_cpuinfo(void) {
     return 0;
 }
 #endif
+
+void lowlevel_init(void)
+{
+    // unused
+}
