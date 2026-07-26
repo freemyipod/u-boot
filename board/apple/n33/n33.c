@@ -29,7 +29,7 @@ ulong get_tbclk(void)
     return 1000000;
 }
 
-void board_gpio_init(void) {
+static void board_gpio_init(void) {
     // UART0
     uint32_t gpio = readl(S5L87XX_PCON(0));
     gpio &= S5L87XX_PCON_PINS_CLEAR_FN(4, 5);
@@ -37,7 +37,7 @@ void board_gpio_init(void) {
     writel(gpio, S5L87XX_PCON(0));
 }
 
-void board_clock_init(void) {
+static void board_clock_init(void) {
     s5l87xx_enable_clkgate("uart0");
 
     // HACKHACKHACK add a pmctrl to linux
@@ -46,7 +46,7 @@ void board_clock_init(void) {
     // HACKHACKHACK
 }
 
-void board_vic_init(void) {
+static void board_vic_init(void) {
     // Disable all VIC interrupts.
     // TODO(q3k): disable VIC elsewhere
     writel(0xffffffff, S5L87XX_VICINTENCLEAR(0));
