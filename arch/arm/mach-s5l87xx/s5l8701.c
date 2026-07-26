@@ -13,3 +13,10 @@ void enable_caches(void)
     // This is here so that we don't see
     // WARNING: Caches not enabled
 }
+
+ulong get_tbclk(void)
+{
+    // Corresponds to timer setup from s5l87xx.c.
+    // Is this correct?
+    return 1416;
+}
