@@ -6,3 +6,9 @@ int print_cpuinfo(void) {
     return 0;
 }
 #endif
+
+ulong get_tbclk(void)
+{
+    // Corresponds to TIMER_F setup from s5l87xx.c.
+    return 1000000;
+}

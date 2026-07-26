@@ -11,3 +11,9 @@ void lowlevel_init(void)
 {
     // unused
 }
+
+ulong get_tbclk(void)
+{
+    // Corresponds to TIMER_F setup from s5l87xx.c.
+    return 1000000;
+}
