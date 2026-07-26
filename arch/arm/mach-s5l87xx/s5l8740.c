@@ -6,3 +6,10 @@ int print_cpuinfo(void) {
     return 0;
 }
 #endif
+
+void enable_caches(void)
+{
+    // Caches already enabled by the bootloader
+    // This is here so that we don't see
+    // WARNING: Caches not enabled
+}
