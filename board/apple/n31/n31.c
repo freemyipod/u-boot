@@ -25,7 +25,7 @@ ulong get_tbclk(void)
     return 1000000;
 }
 
-void board_gpio_init(void) {
+static void board_gpio_init(void) {
     uint32_t value;
 
     // UART0: pad 0, rx pin 4, tx pin 5, fn 2
@@ -72,7 +72,7 @@ void board_gpio_init(void) {
 // UART RX line 0x02000
 // UART TX line 0x20000
 
-void board_clock_init(void) {
+static void board_clock_init(void) {
     uint32_t value;
 
     // writel(0x1BA585, S5L87XX_PWRCON(0));
