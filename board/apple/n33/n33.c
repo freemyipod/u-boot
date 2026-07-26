@@ -19,12 +19,6 @@ int board_init(void)
     return 0;
 }
 
-ulong get_tbclk(void)
-{
-    // Corresponds to TIMER_F setup from s5l87xx.c.
-    return 1000000;
-}
-
 static void board_gpio_init(void) {
     // UART0
     uint32_t gpio = readl(S5L87XX_PCON(0));

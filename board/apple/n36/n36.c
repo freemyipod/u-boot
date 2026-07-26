@@ -18,13 +18,6 @@ int board_init(void)
     return 0;
 }
 
-ulong get_tbclk(void)
-{
-    // Corresponds to timer setup from s5l87xx.c.
-    // Is this correct?
-    return 1416;
-}
-
 static void board_clock_init(void) {
     s5l87xx_enable_clkgate("uart");
 }

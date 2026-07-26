@@ -23,12 +23,6 @@ int board_init(void)
     return 0;
 }
 
-ulong get_tbclk(void)
-{
-    // Corresponds to TIMER_F setup from s5l87xx.c.
-    return 1000000;
-}
-
 // Full GPIO pin-mux table for the iPod nano 3G, derived from the original
 // firmware. Includes the UART0 pins, so this also brings up the debug UART.
 static void board_gpio_init(void)
