@@ -2,6 +2,7 @@ if ARCH_S5L87XX
 
 config S5L8701
     bool "S5L8701"
+    # Actually an ARM940T
     select CPU_ARM920T
 
 config S5L8702
