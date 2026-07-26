@@ -33,12 +33,6 @@ ulong get_tbclk(void)
     return 1000000;
 }
 
-int print_cpuinfo(void)
-{
-    printf("CPU: Samsung S5L8702\n");
-    return 0;
-}
-
 // Full GPIO pin-mux table for the iPod nano 3G, derived from the original
 // firmware. Includes the UART0 pins, so this also brings up the debug UART.
 static void board_gpio_init(void)

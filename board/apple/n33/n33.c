@@ -29,12 +29,6 @@ ulong get_tbclk(void)
     return 1000000;
 }
 
-int print_cpuinfo(void)
-{
-    printf("CPU: Samsung S5L8730\n");
-    return 0;
-}
-
 void board_gpio_init(void) {
     // UART0
     uint32_t gpio = readl(S5L87XX_PCON(0));
