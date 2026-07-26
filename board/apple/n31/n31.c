@@ -25,12 +25,6 @@ ulong get_tbclk(void)
     return 1000000;
 }
 
-int print_cpuinfo(void)
-{
-	printf("CPU: Samsung S5L8740\n");
-	return 0;
-}
-
 void board_gpio_init(void) {
     uint32_t value;
 

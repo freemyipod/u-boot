@@ -29,12 +29,6 @@ ulong get_tbclk(void)
     return 1416;
 }
 
-int print_cpuinfo(void)
-{
-    printf("CPU: Samsung S5L8701\n");
-    return 0;
-}
-
 void board_clock_init(void) {
     s5l87xx_enable_clkgate("uart");
 }
