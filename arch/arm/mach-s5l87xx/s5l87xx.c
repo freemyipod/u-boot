@@ -19,7 +19,7 @@ typedef struct {
  */
 #define S5L87XX_CLKGATE_NONE 0xffffffff
 
-void s5l87xx_reset_cpu(void) {
+void reset_cpu(void) {
     svc32_mode_en();
     // According to S5L8700X datasheet
     // rSWRCON = 0xA5 triggers a Software Reset
