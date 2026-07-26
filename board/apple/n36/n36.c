@@ -29,7 +29,7 @@ ulong get_tbclk(void)
     return 1416;
 }
 
-void board_clock_init(void) {
+static void board_clock_init(void) {
     s5l87xx_enable_clkgate("uart");
 }
 
