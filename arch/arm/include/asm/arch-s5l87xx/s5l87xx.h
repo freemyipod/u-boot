@@ -69,7 +69,6 @@ GENMASK(((tx_pin + 1) * 4) - 1, tx_pin * 4)))
 			("@ I&F disable, Mode: 0x13 - SVC\n\t"		\
 			 "msr     cpsr_c, %0\n\t" : : "r"(0x13|0xC0))
 
-void s5l87xx_reset_cpu(void);
 void s5l87xx_enable_clkgate(const char *id);
 /*
  * Ungate a single clock gate by raw {gate, bit}. Unlike s5l87xx_enable_clkgate()

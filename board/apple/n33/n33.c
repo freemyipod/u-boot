@@ -23,11 +23,6 @@ int board_init(void)
     return 0;
 }
 
-void reset_cpu(void)
-{
-    s5l87xx_reset_cpu();
-}
-
 ulong get_tbclk(void)
 {
     // Corresponds to TIMER_F setup from s5l87xx.c.
