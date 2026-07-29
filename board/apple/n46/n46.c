@@ -5,9 +5,6 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#define S5L87XX_PUNB(n) (S5L87XX_GPIO_BASE + 0x0c + (n) * 0x20)
-#define S5L87XX_PUNC(n) (S5L87XX_GPIO_BASE + 0x10 + (n) * 0x20)
-
 int dram_init(void)
 {
     return fdtdec_setup_mem_size_base();
@@ -70,9 +67,9 @@ enum n46_lcd_type {
 
 static void n46_lcd_write_cmd(uint16_t cmd)
 {
-    while (N46_LCDCON->status & 0x10)
+    while (readl(&N46_LCDCON->status) & 0x10)
         ;
-    N46_LCDCON->wcmd = cmd;
+	writel(cmd, &N46_LCDCON->wcmd);
 }
 
 static void n46_lcd_recv_cmd8(uint8_t cmd, int len, uint8_t *buf)
@@ -80,21 +77,21 @@ static void n46_lcd_recv_cmd8(uint8_t cmd, int len, uint8_t *buf)
     n46_lcd_write_cmd(cmd);
     while (len--) {
         udelay(100);
-        while (!(N46_LCDCON->status & 0x2))
+        while (!(readl(&N46_LCDCON->status) & 0x2))
             ;
-        N46_LCDCON->rdata = 0;
-        while (!(N46_LCDCON->status & 1))
+		writel(0, &N46_LCDCON->rdata);
+        while (!(readl(&N46_LCDCON->status) & 0x1))
             ;
-        *buf++ = N46_LCDCON->dbuff >> 1;
+        *buf++ = readl(&N46_LCDCON->dbuff) >> 1;
     }
 }
 
 static void n46_lcd_write_config(uint32_t config)
 {
-    while (!(N46_LCDCON->status & 0x2))
+    while (!(readl(&N46_LCDCON->status) & 0x2))
         ;
     udelay(1);
-    N46_LCDCON->config = config;
+	writel(config, &N46_LCDCON->config);
 }
 
 static enum n46_lcd_type n46_lcd_get_type(void)
@@ -123,8 +120,8 @@ static void n46_lcd_init(void)
 {
     s5l87xx_enable_clkgate("lcd");
 
-    N46_LCDCON->config = 0x81100db8;
-    N46_LCDCON->phtime = 0x33;
+	writel(0x81100db8, &N46_LCDCON->config);
+	writel(0x33, &N46_LCDCON->phtime);
 
     enum n46_lcd_type type = n46_lcd_get_type();
     const char *types;
