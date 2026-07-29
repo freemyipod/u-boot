@@ -39,13 +39,15 @@ void reset_cpu(void) {
 }
 
 void s5l87xx_enable_clkgate_bit(uint8_t gate, uint8_t bit) {
-    uint32_t mask = ~(((uint32_t) 1) << bit);
+    uint32_t mask = ~BIT(bit);
 #if IS_ENABLED(CONFIG_S5L8701)
     uint32_t value = readl(S5L87XX_PWRCON(gate));
     value &= mask;
     writel(value, S5L87XX_PWRCON(gate));
 #else
-    S5L87XX_CLKCON->gates[gate] &= mask;
+	uint32_t value = readl(&S5L87XX_CLKCON->gates[gate]);
+	value &= mask;
+	writel(value, &S5L87XX_CLKCON->gates[gate]);
 #endif
 }
 
@@ -232,7 +234,7 @@ enum s5l87xx_buscon_remap {
 static void s5l87xx_buscon_remap_sdram(void) {
     log_debug("s5l87xx_buscon_remap_sdram\n");
     volatile struct s5l87xx_buscon *buscon = (struct s5l87xx_buscon *)S5L87XX_BUS_BASE;
-    buscon->remap = S5L87XX_BUSCON_REMAP_ENABLE;
+	writel(S5L87XX_BUSCON_REMAP_ENABLE, &buscon->remap);
 }
 #endif
 
@@ -256,10 +258,10 @@ struct s5l8702_otgphy {
 static void s5l87xx_otgphy_off(void) {
     log_debug("s5l87xx_otgphy: turning off\n");
     volatile struct s5l8702_otgphy *phy = (struct s5l8702_otgphy *)S5L87XX_PHY_BASE;
-    phy->phy_ctrl2 = 0;
-    phy->phy_ctrl1 = 0;
-    phy->rstcon = 0x7;
-    phy->pwr = 0xff;
+	writel(0, &phy->phy_ctrl2);
+	writel(0, &phy->phy_ctrl1);
+	writel(0x7, &phy->rstcon);
+	writel(0xff, &phy->pwr);
 }
 
 static void s5l87xx_otgphy_on(void) {
@@ -268,36 +270,34 @@ static void s5l87xx_otgphy_on(void) {
     s5l87xx_enable_clkgate("usb2-phy");
 
     // Disable USB suspend.
-    volatile uint32_t *pcgcctl = (uint32_t *)(S5L87XX_OTG_BASE + 0xe00);
-    *pcgcctl = 0;
+	writel(0, S5L87XX_OTG_BASE + 0xe00);
 
-    volatile struct s5l8702_otgphy *phy = (struct s5l8702_otgphy *)S5L87XX_PHY_BASE;
-    volatile uint32_t *phy_enable = (uint32_t *)(S5L87XX_PHY_BASE + 0x100);
+    volatile struct s5l8702_otgphy *otgphy = (struct s5l8702_otgphy *)S5L87XX_PHY_BASE;
 
-    phy->pwr    = 0x000;
-    phy->clk    = 0x000;
-    phy->bias   = 0x400;
-    phy->rstcon = 0x007;  // assert all three reset signals
+	writel(0x000, &otgphy->pwr);
+	writel(0x000, &otgphy->clk);
+	writel(0x400, &otgphy->bias);
+	writel(0x007, &otgphy->rstcon); // assert all three reset signals
 
     // Ramp up PHY analog stage 1 incrementally (from disk mode trace).
-    phy->phy_ctrl1 = 0x300;
-    phy->phy_ctrl1 = 0x340;
-    phy->phy_ctrl1 = 0x346;
-    phy->phy_ctrl1 = 0x347;
+	writel(0x300, &otgphy->phy_ctrl1);
+	writel(0x340, &otgphy->phy_ctrl1);
+	writel(0x346, &otgphy->phy_ctrl1);
+	writel(0x347, &otgphy->phy_ctrl1);
 
     // Ramp up PHY analog stage 2 incrementally (from disk mode trace).
-    phy->phy_ctrl2 = 0x0c00;
-    phy->phy_ctrl2 = 0x0fc0;
-    phy->phy_ctrl2 = 0x0fe0;
-    phy->phy_ctrl2 = 0x0ff0;
-    phy->phy_ctrl2 = 0x0fff;
+	writel(0x0c00, &otgphy->phy_ctrl2);
+	writel(0x0fc0, &otgphy->phy_ctrl2);
+	writel(0x0fe0, &otgphy->phy_ctrl2);
+	writel(0x0ff0, &otgphy->phy_ctrl2);
+	writel(0x0fff, &otgphy->phy_ctrl2);
 
-    *phy_enable = 1;      // enable PHY output
+	writel(1, S5L87XX_PHY_BASE + 0x100); // enable PHY output
 
-    phy->rstcon  = 0x000; // deassert reset
-    phy->bias    = 0x400;
-    phy->intfcon = 0x000;
-    phy->bias    = 0x000;
+	writel(0x000, &otgphy->rstcon); // deassert reset
+	writel(0x400, &otgphy->bias);
+	writel(0x000, &otgphy->intfcon);
+	writel(0x000, &otgphy->bias);
 }
 
 #else
@@ -306,16 +306,16 @@ static void s5l87xx_otgphy_off(void) {
     log_debug("s5l87xx_otgphy: turning off\n");
     volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)S5L87XX_PHY_BASE;
 #if IS_ENABLED(CONFIG_S5L8701)
-    otgphy->pwr = 0x0f;    /* PHY: Power down */
+	writel(0x0F, &otgphy->pwr); /* PHY: Power down */
     udelay(10);
-    otgphy->rstcon = 0x07; /* PHY: Assert Software Reset */
+	writel(0x07, &otgphy->rstcon); /* PHY: Assert Software Reset */
     udelay(10);
 #else
-    otgphy->pwr = 0xff;
+	writel(0xFF, &otgphy->pwr);
     mdelay(10);
-    otgphy->rstcon = 0xff;
+	writel(0xFF, &otgphy->rstcon);
     mdelay(10);
-    otgphy->unkcon = 4;
+	writel(4, &otgphy->unkcon);
 #endif
 }
 
@@ -327,30 +327,29 @@ static void s5l87xx_otgphy_on(void) {
 
     // Disable USB suspend.
     // TODO(q3k): move this to DWC2?
-    volatile uint32_t *pcgcctl = (uint32_t *)(S5L87XX_OTG_BASE + 0xe00);
-    *pcgcctl = 0;
+	writel(0, S5L87XX_OTG_BASE + 0xe00);
 
     volatile struct s5l87xx_otgphy *otgphy = (struct s5l87xx_otgphy *)S5L87XX_PHY_BASE;
-    otgphy->pwr = 0; /* PHY: Power up */
+	writel(0, &otgphy->pwr); /* PHY: Power up */
 #if IS_ENABLED(CONFIG_S5L8701)
     udelay(10);
-    otgphy->unkcon = 1;
-    otgphy->unk44 = 0xe3f;
-    otgphy->rstcon = 1; /* PHY: Assert Software Reset */
+	writel(1, &otgphy->unkcon);
+	writel(0xe3f, &otgphy->unk44);
+	writel(1, &otgphy->rstcon); /* PHY: Assert Software Reset */
     udelay(10);
-    otgphy->rstcon = 0; /* PHY: Deassert Software Reset */
+	writel(0, &otgphy->rstcon); /* PHY: Deassert Software Reset */
     udelay(10);
-    otgphy->unk[3] = 0x600;
-    otgphy->con = 0;
+	writel(0x600, &otgphy->unk[3]);
+	writel(0, &otgphy->con);
     udelay(400);
 #else
     mdelay(10);
-    otgphy->rstcon = 1;
+    writel(1, &otgphy->rstcon);
     mdelay(10);
-    otgphy->rstcon = 0;
+    writel(0, &otgphy->rstcon);
     mdelay(10);
-    otgphy->unkcon = 6;
-    otgphy->con = 1;
+	writel(6, &otgphy->unkcon);
+	writel(1, &otgphy->con);
     mdelay(400);
 #endif
 }
@@ -457,25 +456,25 @@ static void s5l87xx_timer_configure_interval(enum s5l87xx_timer_id id) {
 
     volatile struct s5l87xx_timer *timer = s5l87xx_timer_registers(id);
 
-    timer->cmd = S5L87XX_TIMER_CMD_STOP;
+	writel(S5L87XX_TIMER_CMD_STOP, &timer->cmd);
 #if IS_ENABLED(CONFIG_S5L8701)
     /* configure timer for 1000 Hz??? */
-    timer->con = (3 << 8) | (1 << 4);
-    timer->pre = 511;
-    timer->data0 = 0xffff;
-    timer->data1 = 0xffff;
+	writel((3 << 8) | (1 << 4), &timer->con);
+	writel(511, &timer->pre);
+	writel(0xffff, &timer->data0);
+	writel(0xffff, &timer->data1);
 #else
-    timer->con = 0x40;
-    timer->pre = 0xb;
-    timer->data0 = 0xffffffff;
+	writel(0x40, &timer->con);
+	writel(0xb, &timer->pre);
+	writel(0xffffffff, &timer->data0);
 #endif
-    timer->cmd = S5L87XX_TIMER_CMD_CLR;
+	writel(S5L87XX_TIMER_CMD_CLR, &timer->cmd);
 }
 
 static void s5l87xx_timer_start(enum s5l87xx_timer_id id) {
     log_debug("s5l87xx_timer: starting %d\n", id);
     volatile struct s5l87xx_timer *timer = s5l87xx_timer_registers(id);
-    timer->cmd = S5L87XX_TIMER_CMD_START;
+	writel(S5L87XX_TIMER_CMD_START, &timer->cmd);
 }
 
 // unused
@@ -483,13 +482,13 @@ static void s5l87xx_timer_start(enum s5l87xx_timer_id id) {
 static void s5l87xx_timer_stop(enum s5l87xx_timer_id id) {
     log_debug("s5l87xx_timer: stopping %d\n", id);
     volatile struct s5l87xx_timer *timer = s5l87xx_timer_registers(id);
-    timer->cmd = S5L87XX_TIMER_CMD_STOP;
+	writel(S5L87XX_TIMER_CMD_STOP, &timer->cmd);
 }
 #endif
 
 static uint32_t s5l87xx_timer_read(enum s5l87xx_timer_id id) {
     volatile struct s5l87xx_timer *timer = s5l87xx_timer_registers(id);
-    return timer->cnt;
+    return readl(&timer->cnt);
 }
 
 int timer_init(void)
