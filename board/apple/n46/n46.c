@@ -1,7 +1,7 @@
 #include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/arch-s5l87xx/s5l87xx.h>
-#include <linux/delay.h>
+#include <asm/arch-s5l87xx/s5l87xx-clk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -15,8 +15,11 @@ int dram_init_banksize(void)
     return fdtdec_setup_memory_banksize();
 }
 
+void n46_lcd_init(void);
+
 int board_init(void)
 {
+    n46_lcd_init();
     return 0;
 }
 
@@ -36,104 +39,6 @@ static void board_gpio_init(void)
         writel(0, S5L87XX_PUNB(i));
         writel(0, S5L87XX_PUNC(i));
     }
-}
-
-// S5L8702 LCD controller register layout, reverse-engineered from the
-// original firmware. Differs from the layout in s5l87xx.c.
-struct s5l8702_lcdcon {
-    uint32_t config; // 0x00
-    uint32_t wcmd;   // 0x04
-    uint32_t unk1;   // 0x08
-    uint32_t rcmd;   // 0x0c
-    uint32_t rdata;  // 0x10
-    uint32_t dbuff;  // 0x14
-    uint32_t intcon; // 0x18
-    uint32_t status; // 0x1c
-    uint32_t phtime; // 0x20
-    uint32_t unk[4]; // 0x24
-    uint32_t wdata;  // 0x40
-};
-
-#define N46_LCDCON ((volatile struct s5l8702_lcdcon *)S5L87XX_LCD_BASE)
-
-enum n46_lcd_type {
-    N46_LCD_TYPE_UNKNOWN = -1,
-    N46_LCD_TYPE_38B3 = 0,
-    N46_LCD_TYPE_38C4,
-    N46_LCD_TYPE_38D5,
-    N46_LCD_TYPE_38E6,
-    N46_LCD_TYPE_58XX,
-};
-
-static void n46_lcd_write_cmd(uint16_t cmd)
-{
-    while (readl(&N46_LCDCON->status) & 0x10)
-        ;
-	writel(cmd, &N46_LCDCON->wcmd);
-}
-
-static void n46_lcd_recv_cmd8(uint8_t cmd, int len, uint8_t *buf)
-{
-    n46_lcd_write_cmd(cmd);
-    while (len--) {
-        udelay(100);
-        while (!(readl(&N46_LCDCON->status) & 0x2))
-            ;
-		writel(0, &N46_LCDCON->rdata);
-        while (!(readl(&N46_LCDCON->status) & 0x1))
-            ;
-        *buf++ = readl(&N46_LCDCON->dbuff) >> 1;
-    }
-}
-
-static void n46_lcd_write_config(uint32_t config)
-{
-    while (!(readl(&N46_LCDCON->status) & 0x2))
-        ;
-    udelay(1);
-	writel(config, &N46_LCDCON->config);
-}
-
-static enum n46_lcd_type n46_lcd_get_type(void)
-{
-    int retry = 3;
-    uint8_t lcd_id[4];
-
-    while (retry--) {
-        n46_lcd_write_config(0x80000c20);
-        n46_lcd_recv_cmd8(4, 4, lcd_id);
-
-        if (lcd_id[1] == 0x58)
-            return N46_LCD_TYPE_58XX;
-        else if (lcd_id[1] == 0x38) {
-            if      (lcd_id[2] == 0xb3) return N46_LCD_TYPE_38B3;
-            else if (lcd_id[2] == 0xc4) return N46_LCD_TYPE_38C4;
-            else if (lcd_id[2] == 0xd5) return N46_LCD_TYPE_38D5;
-            else if (lcd_id[2] == 0xe6) return N46_LCD_TYPE_38E6;
-        }
-    }
-
-    return N46_LCD_TYPE_UNKNOWN;
-}
-
-static void n46_lcd_init(void)
-{
-    s5l87xx_enable_clkgate("lcd");
-
-	writel(0x81100db8, &N46_LCDCON->config);
-	writel(0x33, &N46_LCDCON->phtime);
-
-    enum n46_lcd_type type = n46_lcd_get_type();
-    const char *types;
-    switch (type) {
-    case N46_LCD_TYPE_38B3: types = "38b3"; break;
-    case N46_LCD_TYPE_38C4: types = "38c4"; break;
-    case N46_LCD_TYPE_38D5: types = "38d5"; break;
-    case N46_LCD_TYPE_38E6: types = "38e6"; break;
-    case N46_LCD_TYPE_58XX: types = "58xx"; break;
-    default:                types = "unknown"; break;
-    }
-    log_debug("n46_lcd_init: detected LCD type %s (%d)\n", types, type);
 }
 
 static void board_clock_init(void)
@@ -164,7 +69,6 @@ static void board_vic_init(void)
 int board_early_init_f(void)
 {
     board_gpio_init();
-    n46_lcd_init();
     board_clock_init();
     board_vic_init();
 

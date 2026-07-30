@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 
-#ifndef S5L87XX_COMMON_H
-#define S5L87XX_COMMON_H
+#ifndef __S5L87XX_H_
+#define __S5L87XX_H_
 
 #include <linux/types.h>
 
@@ -71,12 +71,4 @@ GENMASK(((tx_pin + 1) * 4) - 1, tx_pin * 4)))
 			("@ I&F disable, Mode: 0x13 - SVC\n\t"		\
 			 "msr     cpsr_c, %0\n\t" : : "r"(0x13|0xC0))
 
-void s5l87xx_enable_clkgate(const char *id);
-/*
- * Ungate a single clock gate by raw {gate, bit}. Unlike s5l87xx_enable_clkgate()
- * this needs no device tree, so it is safe in pre-relocation paths (e.g. the
- * debug UART init, which runs before the FDT is set up).
- */
-void s5l87xx_enable_clkgate_bit(uint8_t gate, uint8_t bit);
-
-#endif //S5L87XX_COMMON_H
+#endif //__S5L87XX_H_
