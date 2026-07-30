@@ -40,8 +40,9 @@
 #define S5L87XX_PWRCON(i) (S5L87XX_CLK_BASE + ((i) == 1 ? 0x40 : 0x28))
 #else
 #define S5L87XX_SWRCON    (S5L87XX_CLK_BASE + 0x50)
-#define S5L87XX_PWRCON(i) (S5L87XX_CLK_BASE \
-                                + ((i) == 4 ? 0x6C : \
+/* S5L8702 only uses PWRCON(0) and PWRCON(1) */
+#define S5L87XX_PWRCON(i) (S5L87XX_CLK_BASE + \
+                                  ((i) == 4 ? 0x6C : \
                                   ((i) == 3 ? 0x68 : \
                                   ((i) == 2 ? 0x58 : \
                                   ((i) == 1 ? 0x4C : \
