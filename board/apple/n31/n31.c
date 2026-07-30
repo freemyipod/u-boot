@@ -1,6 +1,7 @@
 #include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/arch-s5l87xx/s5l87xx.h>
+#include <asm/arch-s5l87xx/s5l87xx-clk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -67,26 +68,10 @@ static void board_gpio_init(void) {
 // UART TX line 0x20000
 
 static void board_clock_init(void) {
-    uint32_t value;
-
-    // writel(0x1BA585, S5L87XX_PWRCON(0));
-    
-    value = readl(S5L87XX_PWRCON(1));
-    value &= ~BIT(9);   // UART0
-    value &= ~BIT(29);  // UART1
-    value &= ~BIT(30);  // UART2
-    value &= ~BIT(31);  // UART3
-    writel(value, S5L87XX_PWRCON(1));
-
-    // writel(0x1AF1, S5L87XX_PWRCON(2));
-    // writel(0x3C0FC, S5L87XX_PWRCON(3));
-
-    value = readl(S5L87XX_PWRCON(4));
-    value &= ~BIT(7);   // UART0
-    value &= ~BIT(8);   // UART1
-    value &= ~BIT(9);   // UART2
-    value &= ~BIT(10);  // UART3
-    writel(value, S5L87XX_PWRCON(4));
+    s5l87xx_enable_clkgate("uart0");
+    s5l87xx_enable_clkgate("uart1");
+    s5l87xx_enable_clkgate("uart2");
+    s5l87xx_enable_clkgate("uart3");
 }
 
 #ifdef CONFIG_BOARD_EARLY_INIT_F
@@ -108,7 +93,21 @@ void board_debug_uart_init(void)
     /* Configure UART TX & RX line GPIO */
     board_gpio_init();
 
-    /* Enable UART clocking */
-    board_clock_init();
+    /* Enable UART clocking. Runs before the FDT is set up */
+    // UART0
+    s5l87xx_enable_clkgate_bit(1, 9);
+    s5l87xx_enable_clkgate_bit(4, 7);
+
+    // UART1
+    s5l87xx_enable_clkgate_bit(1, 29);
+    s5l87xx_enable_clkgate_bit(4, 8);
+
+    // UART2
+    s5l87xx_enable_clkgate_bit(1, 30);
+    s5l87xx_enable_clkgate_bit(4, 9);
+
+    // UART3
+    s5l87xx_enable_clkgate_bit(1, 31);
+    s5l87xx_enable_clkgate_bit(4, 10);
 }
 #endif

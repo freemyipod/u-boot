@@ -30,10 +30,12 @@
 	 */
 	clock-gate-names = "timer0", "timer1", "timer2", "timer3", "timer4",
 					   "timer5", "timer6", "timer7", "timer8",
-					   "uart0", "usb-otg", "usb2-phy";
+					   "uart0", "uart1", "uart2", "uart3",
+					   "usb-otg", "usb2-phy";
 	samsung,clock-gates = <37 128>, <55 129>, <56 130>, <57 131>, <58 132>,
 						  <56 130>, <57 131>, <69 150>, <70 151>,
-						  <41 135>, <2 0xffffffff>, <35 0xffffffff>;
+						  <41 135>, <61 136>, <62 137>, <63 138>,
+						  <2 0xffffffff>, <35 0xffffffff>;
 };
 
 &uart3 {
