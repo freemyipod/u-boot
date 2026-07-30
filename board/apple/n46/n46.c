@@ -50,12 +50,6 @@ static void board_clock_init(void)
 
     // I2C0 carries the PMU; Linux needs it clocked.
     s5l87xx_enable_clkgate("i2c0");
-
-    s5l87xx_enable_clkgate("usb-otg");
-    s5l87xx_enable_clkgate("usb2-phy");
-
-    // Disable USB power-clock gating so the DWC2 core is accessible.
-    writel(0, S5L87XX_OTG_BASE + 0xe00);
 }
 
 static void board_vic_init(void)
