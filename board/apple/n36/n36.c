@@ -1,5 +1,5 @@
 #include <asm/global_data.h>
-#include <asm/arch-s5l87xx/s5l87xx.h>
+#include <asm/arch-s5l87xx/s5l87xx-clk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 

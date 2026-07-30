@@ -1,6 +1,7 @@
 #include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/arch-s5l87xx/s5l87xx.h>
+#include <asm/arch-s5l87xx/s5l87xx-clk.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -14,8 +15,11 @@ int dram_init_banksize(void)
     return fdtdec_setup_memory_banksize();
 }
 
+void n33_lcd_init(void);
+
 int board_init(void)
 {
+	n33_lcd_init();
     return 0;
 }
 
