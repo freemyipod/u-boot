@@ -1,0 +1,8 @@
+if S5L8723
+
+config TARGET_N20
+    bool "Apple N20 - iPod nano (6th generation)"
+
+source "board/apple/n20/Kconfig"
+
+endif

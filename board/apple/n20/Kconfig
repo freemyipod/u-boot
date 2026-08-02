@@ -1,0 +1,15 @@
+if TARGET_N20
+
+config SYS_BOARD
+    default "n20"
+
+config SYS_VENDOR
+    default "apple"
+
+config SYS_SOC
+	default "s5l8723"
+
+config SYS_CONFIG_NAME
+    default "apple_n20"
+
+endif
