@@ -3,6 +3,8 @@
 #ifndef __S5L87XX_CLK_H_
 #define __S5L87XX_CLK_H_
 
+#include <inttypes.h>
+
 /*
  * Ungate a single clock gate by raw {gate, bit}. Unlike s5l87xx_enable_clkgate()
  * this needs no device tree, so it is safe in pre-relocation paths (e.g. the
