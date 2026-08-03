@@ -1,24 +1,6 @@
-#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/arch-s5l87xx/s5l87xx.h>
 #include <asm/arch-s5l87xx/s5l87xx-clk.h>
-
-DECLARE_GLOBAL_DATA_PTR;
-
-int dram_init(void)
-{
-    return fdtdec_setup_mem_size_base();
-}
-
-int dram_init_banksize(void)
-{
-    return fdtdec_setup_memory_banksize();
-}
-
-int board_init(void)
-{
-	return 0;
-}
 
 static void board_gpio_init(void) {
     uint32_t value;
