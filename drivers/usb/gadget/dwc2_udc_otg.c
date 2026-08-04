@@ -1044,7 +1044,6 @@ static void dwc2_set_stm32mp1_hsotg_params(struct dwc2_plat_otg_data *p)
 
 static void dwc2_set_s5l87xx_hsotg_params(struct dwc2_plat_otg_data *p)
 {
-	p->activate_stm_id_vb_detection = true;
 	p->usb_gusbcfg =
 		0 << 15		/* PHY Low Power Clock sel*/
 		| 0x5 << 10	/* USB Turnaround time (5) */
