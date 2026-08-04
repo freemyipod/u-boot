@@ -1,3 +1,8 @@
+/* SPDX-License-Identifier: GPL-2.0+ */
+/*
+ * Copyright (C) 2026 The freemyipod team (freemyipod.org)
+ */
+
 #include <asm-offsets.h>
 #include <config.h>
 #include <linux/linkage.h>
