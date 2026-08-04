@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 #
-# Copyright The freemyipod team (freemyipod.org)
+# Copyright (C) 2026 The freemyipod team (freemyipod.org)
 #
 
 obj-y += s5l87xx.o

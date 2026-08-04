@@ -2,7 +2,7 @@
 /*
  * Peripherals common to Samsung S5L8702 and later SoCs
  *
- * Copyright The freemyipod team (freemyipod.org)
+ * Copyright (C) 2026 The freemyipod team (freemyipod.org)
  */
 
 #include "s5l87xx.dtsi"

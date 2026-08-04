@@ -1,4 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
+/*
+ * Copyright (C) 2026 The freemyipod team (freemyipod.org)
+ */
 
 #ifndef __S5L87XX_CLK_H_
 #define __S5L87XX_CLK_H_
