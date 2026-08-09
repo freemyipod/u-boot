@@ -42,6 +42,8 @@ static void board_clock_init(void)
 
     // I2C0 carries the PMU; Linux needs it clocked.
     s5l87xx_enable_clkgate("i2c0");
+
+    s5l87xx_enable_clkgate("bootrom");
 }
 
 static void board_vic_init(void)
