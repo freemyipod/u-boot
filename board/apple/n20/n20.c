@@ -17,6 +17,7 @@ static void board_gpio_init(void) {
 
 static void board_clock_init(void) {
     s5l87xx_enable_clkgate("uart0");
+    s5l87xx_enable_clkgate("bootrom");
 }
 
 static void board_vic_init(void) {

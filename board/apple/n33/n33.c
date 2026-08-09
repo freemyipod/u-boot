@@ -30,6 +30,7 @@ static void board_clock_init(void) {
     // needed for timer c0..???
     s5l87xx_enable_clkgate("timer3");
     // HACKHACKHACK
+    s5l87xx_enable_clkgate("bootrom");
 }
 
 static void board_vic_init(void) {

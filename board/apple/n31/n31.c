@@ -59,6 +59,7 @@ static void board_clock_init(void) {
     s5l87xx_enable_clkgate("uart1");
     s5l87xx_enable_clkgate("uart2");
     s5l87xx_enable_clkgate("uart3");
+    s5l87xx_enable_clkgate("bootrom");
 }
 
 #ifdef CONFIG_BOARD_EARLY_INIT_F

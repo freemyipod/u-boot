@@ -28,14 +28,14 @@ __weak int board_init(void)
 #ifdef CONFIG_SET_DFU_ALT_INFO
 void set_dfu_alt_info(char *interface, char *devstr)
 {
-    char buf[64];
+    char buf[96];
     ulong start;
     ulong size;
 
     if (!env_get("dfu_alt_info")) {
         start = gd->ram_base;
         size = gd->ram_size - SZ_4M;
-        snprintf(buf, sizeof(buf), "firmware ram 0x%08lx 0x%08lx", start, size);
+        snprintf(buf, sizeof(buf), "firmware ram 0x%08lx 0x%08lx;bootrom ram 0x20000000 0xc800", start, size);
         env_set("dfu_alt_info", buf);
     }
 }
