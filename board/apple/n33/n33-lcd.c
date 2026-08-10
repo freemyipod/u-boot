@@ -9,6 +9,7 @@
 enum n33_lcd_type {
     N33_LCD_TYPE_UNSUPPORTED = -1,
     N33_LCD_TYPE_38B3 = 0,
+    N33_LCD_TYPE_38C4,
     N33_LCD_TYPE_38F7,
     N33_LCD_TYPE_48C4,
     N33_LCD_TYPE_COUNT,
@@ -16,6 +17,7 @@ enum n33_lcd_type {
 
 static const char *n33_lcd_type_names[] = {
     [N33_LCD_TYPE_38B3] = "38b3",
+    [N33_LCD_TYPE_38C4] = "38c4",
     [N33_LCD_TYPE_38F7] = "38f7",
     [N33_LCD_TYPE_48C4] = "48c4",
 };
@@ -30,6 +32,10 @@ static enum n33_lcd_type n33_lcd_get_type(void) {
     if (lcd_id[0] == 0x38) {
         if (lcd_id[1] == 0xb3) {
             return N33_LCD_TYPE_38B3;
+        }
+
+        if (lcd_id[1] == 0xc4) {
+            return N33_LCD_TYPE_38C4;
         }
 
         if (lcd_id[1] == 0xf7) {
