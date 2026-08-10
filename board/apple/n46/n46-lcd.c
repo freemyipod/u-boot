@@ -14,12 +14,24 @@ enum n46_lcd_type {
     N46_LCD_TYPE_38D5,
     N46_LCD_TYPE_38E6,
     N46_LCD_TYPE_58XX,
+    N46_LCD_TYPE_COUNT,
 };
+
+static const char *n46_lcd_type_names[] = {
+    [N46_LCD_TYPE_38B3] = "38b3",
+    [N46_LCD_TYPE_38C4] = "38c4",
+    [N46_LCD_TYPE_38D5] = "38d5",
+    [N46_LCD_TYPE_38E6] = "38e6",
+    [N46_LCD_TYPE_58XX] = "58xx",
+};
+
+static const char *n46_lcd_type_unsupported = "unsupported";
+static const char *n46_lcd_type_unknown = "unknown";
 
 static enum n46_lcd_type n46_lcd_get_type(void)
 {
     int retry = 3;
-    uint8_t lcd_id[4];
+    uint8_t lcd_id[4] = {0};
 
     while (retry--) {
         s5l8702_lcdcon_write_config(0x80000c20);
@@ -27,15 +39,36 @@ static enum n46_lcd_type n46_lcd_get_type(void)
 
         if (lcd_id[1] == 0x58)
             return N46_LCD_TYPE_58XX;
-        else if (lcd_id[1] == 0x38) {
-            if      (lcd_id[2] == 0xb3) return N46_LCD_TYPE_38B3;
-            else if (lcd_id[2] == 0xc4) return N46_LCD_TYPE_38C4;
-            else if (lcd_id[2] == 0xd5) return N46_LCD_TYPE_38D5;
-            else if (lcd_id[2] == 0xe6) return N46_LCD_TYPE_38E6;
+
+        if (lcd_id[1] == 0x38) {
+            if (lcd_id[2] == 0xb3)
+                return N46_LCD_TYPE_38B3;
+
+            if (lcd_id[2] == 0xc4)
+                return N46_LCD_TYPE_38C4;
+
+            if (lcd_id[2] == 0xd5)
+                return N46_LCD_TYPE_38D5;
+
+            if (lcd_id[2] == 0xe6)
+                return N46_LCD_TYPE_38E6;
         }
     }
 
     return N46_LCD_TYPE_UNSUPPORTED;
+}
+
+static const char *n46_lcd_get_name(enum n46_lcd_type type)
+{
+    if (type == N46_LCD_TYPE_UNSUPPORTED) {
+        return n46_lcd_type_unsupported;
+    }
+
+    if (type < N46_LCD_TYPE_UNSUPPORTED || type >= N46_LCD_TYPE_COUNT) {
+        return n46_lcd_type_unknown;
+    }
+
+    return n46_lcd_type_names[type];
 }
 
 void n46_lcd_init(void)
@@ -46,14 +79,6 @@ void n46_lcd_init(void)
     s5l8702_lcdcon_write_phtime(0x33);
 
     enum n46_lcd_type type = n46_lcd_get_type();
-    const char *types = "unknown";
-    switch (type) {
-        case N46_LCD_TYPE_38B3: types = "38b3"; break;
-        case N46_LCD_TYPE_38C4: types = "38c4"; break;
-        case N46_LCD_TYPE_38D5: types = "38d5"; break;
-        case N46_LCD_TYPE_38E6: types = "38e6"; break;
-        case N46_LCD_TYPE_58XX: types = "58xx"; break;
-        case N46_LCD_TYPE_UNSUPPORTED: types = "unsupported"; break;
-    }
-    printf("LCD:   Type %s (%d)\n", types, type);
+    const char *name = n46_lcd_get_name(type);
+    printf("LCD:   Type %s (%d)\n", name, type);
 }
