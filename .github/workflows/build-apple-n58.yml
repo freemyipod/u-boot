@@ -1,0 +1,30 @@
+name: Build for Apple N58 - iPod nano (4th generation)
+
+on: push
+
+jobs:
+  build-uboot:
+    runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/freemyipod/gcc-arm-env:main
+       
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Configure U-Boot
+        run: |
+          make apple_n58_defconfig
+
+      - name: Build U-Boot
+        run: |
+          make -j$(nproc) CROSS_COMPILE=arm-none-eabi-
+
+      - name: Upload U-Boot artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: u-boot-apple-n58-artifacts
+          path: |
+            u-boot*
+            dts/dt.dtb
+            System.map
