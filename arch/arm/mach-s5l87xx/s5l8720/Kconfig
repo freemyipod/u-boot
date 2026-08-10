@@ -1,0 +1,8 @@
+if S5L8720
+
+config TARGET_N58
+    bool "Apple N58 - iPod nano (4th generation)"
+
+source "board/apple/n58/Kconfig"
+
+endif
