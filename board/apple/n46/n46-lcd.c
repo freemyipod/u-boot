@@ -55,6 +55,8 @@ static enum n46_lcd_type n46_lcd_get_type(void)
         }
     }
 
+    printf("Warning: Unsupported LCD type: %02x%02x%02x%02x\n", lcd_id[0], lcd_id[1], lcd_id[2], lcd_id[3]);
+
     return N46_LCD_TYPE_UNSUPPORTED;
 }
 
