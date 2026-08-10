@@ -9,6 +9,10 @@ config S5L8702
     bool "S5L8702"
     select CPU_ARM926EJS
 
+config S5L8720
+    bool "S5L8720"
+    select CPU_ARM1176
+
 config S5L8723
     bool "S5L8723"
     select CPU_ARM1176
@@ -23,6 +27,7 @@ config S5L8740
 
 source "arch/arm/mach-s5l87xx/s5l8701/Kconfig"
 source "arch/arm/mach-s5l87xx/s5l8702/Kconfig"
+source "arch/arm/mach-s5l87xx/s5l8720/Kconfig"
 source "arch/arm/mach-s5l87xx/s5l8723/Kconfig"
 source "arch/arm/mach-s5l87xx/s5l8730/Kconfig"
 source "arch/arm/mach-s5l87xx/s5l8740/Kconfig"
