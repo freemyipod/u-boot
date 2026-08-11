@@ -3,6 +3,10 @@ if S5L8702
 config TARGET_N46
     bool "Apple N46 - iPod nano (3rd generation)"
 
+config TARGET_N25
+    bool "Apple N25 - iPod classic (6th generation)"
+
 source "board/apple/n46/Kconfig"
+source "board/apple/n25/Kconfig"
 
 endif
