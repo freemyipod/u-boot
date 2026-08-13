@@ -33,10 +33,16 @@ void set_dfu_alt_info(char *interface, char *devstr)
     ulong size;
 
     if (!env_get("dfu_alt_info")) {
-        start = gd->ram_base;
-        size = gd->ram_size - SZ_4M;
+        /* don't touch the upper 4M, U-boot is relocated there
+         * use upper half of the remaining space for loading
+         * and the lower for booting the payload, e.g. Linux
+         */
+        size = (gd->ram_size - SZ_4M) / 2;
+        start = gd->ram_base + size;
         snprintf(buf, sizeof(buf), "firmware ram 0x%08lx 0x%08lx;bootrom ram 0x20000000 0xc800", start, size);
         env_set("dfu_alt_info", buf);
+
+        env_set_hex("loadaddr", start);
     }
 }
 #endif
