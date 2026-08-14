@@ -51,9 +51,6 @@ static void board_gpio_init(void) {
     writel(value, S5L87XX_PPIE(10));
 }
 
-// UART RX line 0x02000
-// UART TX line 0x20000
-
 static void board_clock_init(void) {
     s5l87xx_enable_clkgate("uart0");
     s5l87xx_enable_clkgate("uart1");
