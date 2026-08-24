@@ -2,7 +2,7 @@
 /*
  * Apple iPod nano (4th generation)
  *
- * target-type: N58
+ * target-type: N58s
  *
  * Copyright (C) 2026 The freemyipod team (freemyipod.org)
  */
@@ -13,7 +13,7 @@
 #include "s5l87xx-nxx.dtsi"
 
 / {
-	compatible = "apple,n58", "samsung,s5l8720", "apple,arm-platform";
+	compatible = "apple,n58s", "samsung,s5l8720", "apple,arm-platform";
 	model = "Apple iPod nano (4th generation)";
 };
 
