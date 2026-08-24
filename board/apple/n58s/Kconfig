@@ -1,7 +1,7 @@
-if TARGET_N58
+if TARGET_N58S
 
 config SYS_BOARD
-    default "n58"
+    default "n58s"
 
 config SYS_VENDOR
     default "apple"
@@ -10,6 +10,6 @@ config SYS_SOC
 	default "s5l8720"
 
 config SYS_CONFIG_NAME
-    default "apple_n58"
+    default "apple_n58s"
 
 endif
