@@ -4,4 +4,4 @@
 #
 
 obj-y += ../nxx-common/nxx.o
-obj-y += n58.o
+obj-y += n58s.o

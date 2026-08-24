@@ -1,4 +1,4 @@
-name: Build for Apple N58 - iPod nano (4th generation)
+name: Build for Apple N58s - iPod nano (4th generation)
 
 on: push
 
@@ -14,7 +14,7 @@ jobs:
 
       - name: Configure U-Boot
         run: |
-          make apple_n58_defconfig
+          make apple_n58s_defconfig
 
       - name: Build U-Boot
         run: |
@@ -23,7 +23,7 @@ jobs:
       - name: Upload U-Boot artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: u-boot-apple-n58-artifacts
+          name: u-boot-apple-n58s-artifacts
           path: |
             u-boot*
             dts/dt.dtb
