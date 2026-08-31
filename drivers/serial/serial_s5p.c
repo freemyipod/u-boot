@@ -110,7 +110,7 @@ static void __maybe_unused s5p_serial_init(struct s5p_uart *uart)
 	writel(UCON_RX_IRQ_OR_POLLING | UCON_TX_IRQ_OR_POLLING |
 	       UCON_RX_ERR_IRQ_EN | UCON_TX_IRQ_LEVEL, &uart->ucon);
 
-#if IS_ENABLED(CONFIG_S5L8720) || IS_ENABLED(CONFIG_S5L8723) || IS_ENABLED(CONFIG_S5L8740)
+#if IS_ENABLED(CONFIG_S5L8720) || IS_ENABLED(CONFIG_S5L8723) || IS_ENABLED(CONFIG_S5L8730) || IS_ENABLED(CONFIG_S5L8740)
 	u32 val = readl(&uart->ucon);
 	writel(val | S5L_CLK_NCLK, &uart->ucon);
 #endif
