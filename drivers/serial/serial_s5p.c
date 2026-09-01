@@ -62,6 +62,7 @@ struct s5p_serial_plat {
 	u32 tx_fifo_full;
 };
 
+#if !IS_ENABLED(CONFIG_ARCH_S5L87XX)
 /*
  * The coefficient, used to calculate the baudrate on S5P UARTs is
  * calculated as
@@ -87,6 +88,7 @@ static const int udivslot[] = {
 	0xdfdf,
 	0xffdf,
 };
+#endif
 
 static void __maybe_unused s5p_serial_init(struct s5p_uart *uart)
 {
@@ -126,12 +128,14 @@ static void __maybe_unused s5p_serial_baud(struct s5p_uart *uart, u8 reg_width,
 
 	writel(val / 16 - 1, &uart->ubrdiv);
 
+#if !IS_ENABLED(CONFIG_ARCH_S5L87XX)
 	if (s5p_uart_divslot())
 		writew(udivslot[val % 16], &uart->rest.slot);
 	else if (reg_width == 4)
 		writel(val % 16, &uart->rest.value);
 	else
 		writeb(val % 16, &uart->rest.value);
+#endif
 }
 
 #ifndef CONFIG_XPL_BUILD
