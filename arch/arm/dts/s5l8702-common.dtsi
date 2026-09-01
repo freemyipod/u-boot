@@ -26,8 +26,8 @@
 			clocks = <&clkref>;
 			clock-names = "otg";
 			g-rx-fifo-size = <256>;
-			g-np-tx-fifo-size = <32>;
-			g-tx-fifo-size = <256 256 512 512 512 768 768>;
+			g-np-tx-fifo-size = <256>;
+			g-tx-fifo-size = <256 256 256 256 256 256>;
 			dr_mode = "peripheral";
 		};
 	};
