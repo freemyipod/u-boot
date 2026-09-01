@@ -25,11 +25,6 @@ static void board_gpio_init(void) {
 
 static void board_clock_init(void) {
     s5l87xx_enable_clkgate("uart0");
-
-    // HACKHACKHACK add a pmctrl to linux
-    // needed for timer c0..???
-    s5l87xx_enable_clkgate("timer3");
-    // HACKHACKHACK
     s5l87xx_enable_clkgate("bootrom");
 }
 
