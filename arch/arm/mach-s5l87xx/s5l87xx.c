@@ -7,8 +7,6 @@
 #include <asm/io.h>
 #include <asm/arch-s5l87xx/s5l87xx.h>
 
-DECLARE_GLOBAL_DATA_PTR;
-
 void reset_cpu(void) {
     svc32_mode_en();
     // According to S5L8700X datasheet
