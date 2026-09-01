@@ -1051,7 +1051,6 @@ static void dwc2_set_s5l87xx_hsotg_params(struct dwc2_plat_otg_data *p)
 		| 1 << 8	/* [1:SRP enable]*/
 		| 0 << 6	/* 0: high speed utmi+, 1: full speed serial*/
 		| 1<<3;	/* phy i/f  0:8bit, 1:16bit*/
-		//| 0x7 << 0;	/* FS timeout calibration**/
 }
 
 static int dwc2_udc_otg_reset_init(struct udevice *dev,
