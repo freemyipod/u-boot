@@ -8,7 +8,7 @@
 
 #define CFG_SYS_UBOOT_BASE		CONFIG_TEXT_BASE
 
-// 256K SRAM total, 64K fast and 192K slower, but still faster than DRAM
+// 256K SRAM total, first 64K is the fastest
 #define CFG_SYS_INIT_RAM_ADDR	0x22000000
 #define CFG_SYS_INIT_RAM_SIZE	0x00040000
 
