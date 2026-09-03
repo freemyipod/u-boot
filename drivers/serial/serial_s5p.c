@@ -99,12 +99,13 @@ static void __maybe_unused s5p_serial_init(struct s5p_uart *uart)
 	/* 8N1, no parity bit */
 	writel(ULCON_WORD_8_BIT, &uart->ulcon);
 	/* No interrupts, no DMA, pure polling */
-#if IS_ENABLED(CONFIG_ARCH_S5L87XX)
-	writel(UCON_RX_IRQ_OR_POLLING | UCON_TX_IRQ_OR_POLLING | S5L_CLK_NCLK,
-	       &uart->ucon);
-#else
 	writel(UCON_RX_IRQ_OR_POLLING | UCON_TX_IRQ_OR_POLLING |
 	       UCON_RX_ERR_IRQ_EN | UCON_TX_IRQ_LEVEL, &uart->ucon);
+
+#if IS_ENABLED(CONFIG_ARCH_S5L87XX)
+	u32 val = readl(&uart->ucon);
+	val |= S5L_CLK_NCLK;
+	writel(val, &uart->ucon);
 #endif
 }
 
