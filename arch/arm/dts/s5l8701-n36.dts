@@ -22,5 +22,5 @@
 };
 
 &clkref {
-	clock-frequency = <48000000>;
+	clock-frequency = <24000000>;
 };
