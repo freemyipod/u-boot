@@ -21,7 +21,7 @@ void enable_caches(void)
 
 ulong get_tbclk(void)
 {
-    // Corresponds to timer setup from s5l87xx.c.
+    // Corresponds to timer setup from s5l8701-timer.c.
     // Is this correct?
     return 1416;
 }
