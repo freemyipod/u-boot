@@ -14,13 +14,7 @@ void reset_cpu(void) {
     // rWDTCON = 0x100000 is not documented but might trigger a Watchdog Reset
     // writel(0xA5, S5L87XX_SWRCON);
 
-#if IS_ENABLED(CONFIG_S5L8701)
-    writel(0x110AFF, S5L87XX_WDTCON);
-    writel(0xff0, S5L87XX_WDTCNT);
-    writel(0x1100FF, S5L87XX_WDTCON);
-#else
     writel(0x100000, S5L87XX_WDTCON);
-#endif
 
     while (1)
         ;	/* loop forever till reset */
