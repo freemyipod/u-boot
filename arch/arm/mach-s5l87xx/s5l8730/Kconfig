@@ -1,0 +1,11 @@
+if S5L8730
+
+config TARGET_N33
+	bool "Apple N33 - iPod nano (5th generation)"
+	help
+	  Apple iPod nano (5th generation) is a digital audio player, introduced in
+	  September 2009. It has a NAND flash of either 8 or 16 GiB.
+
+source "board/apple/n33/Kconfig"
+
+endif

@@ -13,7 +13,7 @@
 #include <asm/global_data.h>
 #include <linux/compiler.h>
 #include <asm/io.h>
-#if !IS_ENABLED(CONFIG_ARCH_APPLE)
+#if !IS_ENABLED(CONFIG_ARCH_APPLE) && !IS_ENABLED(CONFIG_ARCH_S5L87XX)
 #include <asm/arch/clk.h>
 #endif
 #include <asm/arch/uart.h>
@@ -40,6 +40,7 @@ enum {
 #define S5L_TX_FIFO_COUNT_SHIFT	4
 #define S5L_TX_FIFO_COUNT_MASK	(0xf << S5L_TX_FIFO_COUNT_SHIFT)
 #define S5L_TX_FIFO_FULL	BIT(9)
+#define S5L_CLK_NCLK		BIT(10)
 
 #define S5P_RX_FIFO_COUNT_SHIFT	0
 #define S5P_RX_FIFO_COUNT_MASK	(0xff << S5P_RX_FIFO_COUNT_SHIFT)
@@ -61,6 +62,7 @@ struct s5p_serial_plat {
 	u32 tx_fifo_full;
 };
 
+#if !IS_ENABLED(CONFIG_ARCH_S5L87XX)
 /*
  * The coefficient, used to calculate the baudrate on S5P UARTs is
  * calculated as
@@ -86,6 +88,7 @@ static const int udivslot[] = {
 	0xdfdf,
 	0xffdf,
 };
+#endif
 
 static void __maybe_unused s5p_serial_init(struct s5p_uart *uart)
 {
@@ -98,6 +101,14 @@ static void __maybe_unused s5p_serial_init(struct s5p_uart *uart)
 	/* No interrupts, no DMA, pure polling */
 	writel(UCON_RX_IRQ_OR_POLLING | UCON_TX_IRQ_OR_POLLING |
 	       UCON_RX_ERR_IRQ_EN | UCON_TX_IRQ_LEVEL, &uart->ucon);
+
+	if (IS_ENABLED(CONFIG_ARCH_S5L87XX)) {
+		u32 val;
+
+		val = readl(&uart->ucon);
+		val |= S5L_CLK_NCLK;
+		writel(val, &uart->ucon);
+	}
 }
 
 static void __maybe_unused s5p_serial_baud(struct s5p_uart *uart, u8 reg_width,
@@ -109,12 +120,14 @@ static void __maybe_unused s5p_serial_baud(struct s5p_uart *uart, u8 reg_width,
 
 	writel(val / 16 - 1, &uart->ubrdiv);
 
+#if !IS_ENABLED(CONFIG_ARCH_S5L87XX)
 	if (s5p_uart_divslot())
 		writew(udivslot[val % 16], &uart->rest.slot);
 	else if (reg_width == 4)
 		writel(val % 16, &uart->rest.value);
 	else
 		writeb(val % 16, &uart->rest.value);
+#endif
 }
 
 #ifndef CONFIG_XPL_BUILD
@@ -124,7 +137,8 @@ int s5p_serial_setbrg(struct udevice *dev, int baudrate)
 	struct s5p_uart *const uart = plat->reg;
 	u32 uclk;
 
-#if IS_ENABLED(CONFIG_CLK_EXYNOS) || IS_ENABLED(CONFIG_ARCH_APPLE)
+#if IS_ENABLED(CONFIG_CLK_EXYNOS) || IS_ENABLED(CONFIG_ARCH_APPLE) || \
+	IS_ENABLED(CONFIG_ARCH_S5L87XX)
 	struct clk clk;
 	int ret;
 
@@ -286,26 +300,25 @@ static inline void _debug_uart_init(void)
 	struct s5p_uart *uart = (struct s5p_uart *)CONFIG_VAL(DEBUG_UART_BASE);
 
 	s5p_serial_init(uart);
-#if IS_ENABLED(CONFIG_ARCH_APPLE)
-	s5p_serial_baud(uart, 4, CONFIG_DEBUG_UART_CLOCK, CONFIG_BAUDRATE);
-#else
-	s5p_serial_baud(uart, 1, CONFIG_DEBUG_UART_CLOCK, CONFIG_BAUDRATE);
-#endif
+	if (IS_ENABLED(CONFIG_ARCH_APPLE) || IS_ENABLED(CONFIG_ARCH_S5L87XX))
+		s5p_serial_baud(uart, 4, CONFIG_DEBUG_UART_CLOCK, CONFIG_BAUDRATE);
+	else
+		s5p_serial_baud(uart, 1, CONFIG_DEBUG_UART_CLOCK, CONFIG_BAUDRATE);
 }
 
 static inline void _debug_uart_putc(int ch)
 {
 	struct s5p_uart *uart = (struct s5p_uart *)CONFIG_VAL(DEBUG_UART_BASE);
 
-#if IS_ENABLED(CONFIG_ARCH_APPLE)
-	while (readl(&uart->ufstat) & S5L_TX_FIFO_FULL)
-		;
-	writel(ch, &uart->utxh);
-#else
-	while (readl(&uart->ufstat) & S5P_TX_FIFO_FULL)
-		;
-	writeb(ch, &uart->utxh);
-#endif
+	if (IS_ENABLED(CONFIG_ARCH_APPLE) || IS_ENABLED(CONFIG_ARCH_S5L87XX)) {
+		while (readl(&uart->ufstat) & S5L_TX_FIFO_FULL)
+			;
+		writel(ch, &uart->utxh);
+	} else {
+		while (readl(&uart->ufstat) & S5P_TX_FIFO_FULL)
+			;
+		writeb(ch, &uart->utxh);
+	}
 }
 
 DEBUG_UART_FUNCS

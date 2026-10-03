@@ -565,6 +565,16 @@ F:	drivers/clk/exynos/clk-exynos850.c
 F:	drivers/phy/phy-exynos-usbdrd.c
 F:	drivers/pinctrl/exynos/pinctrl-exynos850.c
 
+ARM SAMSUNG S5L87XX SOC
+M:	Vencislav Atanasov <user890104@freemyipod.org>
+S:	Maintained
+F:	arch/arm/dts/s5l87*
+F:	arch/arm/include/asm/arch-s5l87*
+F:	arch/arm/mach-s5l87*
+F:	board/apple/n*
+F:	configs/apple_n*
+F:	include/configs/apple_n*
+
 ARM SAMSUNG SOC DRIVERS
 M:	Sam Protsenko <semen.protsenko@linaro.org>
 S:	Maintained
