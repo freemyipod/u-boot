@@ -1,7 +1,10 @@
 if S5L8720
 
 config TARGET_N58S
-    bool "Apple N58s - iPod nano (4th generation)"
+	bool "Apple N58s - iPod nano (4th generation)"
+	help
+	  Apple iPod nano (4th generation) is a digital audio player, introduced in
+	  September 2008. It has a NAND flash of either 8 or 16 GiB.
 
 source "board/apple/n58s/Kconfig"
 

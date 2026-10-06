@@ -1,29 +1,47 @@
 if ARCH_S5L87XX
 
 config S5L8701
-    bool "S5L8701"
-    # Actually an ARM940T
-    select CPU_ARM920T
+	bool "S5L8701"
+	# Actually an ARM940T
+	select CPU_ARM920T
+	help
+	  The Samsung S5L8701 is an ARM-based SoC with a single core ARM940T.
+	  Peripherals include USB2 device, USB1.1 OTG, I2C, I2S, UART and SPI.
 
 config S5L8702
-    bool "S5L8702"
-    select CPU_ARM926EJS
+	bool "S5L8702"
+	select CPU_ARM926EJS
+	help
+	  The Samsung S5L8702 is an ARM-based SoC with a single core ARM926EJ-S.
+	  Peripherals include USB2 device, USB1.1 OTG, I2C, I2S, UART and SPI.
 
 config S5L8720
-    bool "S5L8720"
-    select CPU_ARM1176
+	bool "S5L8720"
+	select CPU_ARM1176
+	help
+	  The Samsung S5L8720 is an ARM-based SoC with a single core ARM1176JZF-S.
+	  Peripherals include USB2 device, USB1.1 OTG, I2C, I2S, UART and SPI.
 
 config S5L8723
-    bool "S5L8723"
-    select CPU_ARM1176
+	bool "S5L8723"
+	select CPU_ARM1176
+	help
+	  The Samsung S5L8723 is an ARM-based SoC with a single core ARM1176JZF-S.
+	  Peripherals include USB2 device, USB1.1 OTG, I2C, I2S, UART and SPI.
 
 config S5L8730
-    bool "S5L8730"
-    select CPU_ARM1176
+	bool "S5L8730"
+	select CPU_ARM1176
+	help
+	  The Samsung S5L8730 is an ARM-based SoC with a single core ARM1176JZF-S.
+	  Peripherals include USB2 device, USB1.1 OTG, I2C, I2S, UART and SPI.
 
 config S5L8740
-    bool "S5L8740"
-    select CPU_V7A
+	bool "S5L8740"
+	select CPU_V7A
+	help
+	  The Samsung S5L8740 is an ARM-based SoC with a single core ARM Cortex A5.
+	  Peripherals include USB2 device, USB1.1 OTG, I2C, I2S, UART and SPI.
 
 source "arch/arm/mach-s5l87xx/s5l8701/Kconfig"
 source "arch/arm/mach-s5l87xx/s5l8702/Kconfig"

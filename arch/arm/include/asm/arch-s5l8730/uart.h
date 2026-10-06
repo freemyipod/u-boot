@@ -11,17 +11,17 @@
 #ifndef __ASSEMBLY__
 
 struct s5p_uart {
-    unsigned int	ulcon;
-    unsigned int	ucon;
-    unsigned int	ufcon;
-    unsigned int	umcon;
-    unsigned int	utrstat;
-    unsigned int	uerstat;
-    unsigned int	ufstat;
-    unsigned int	umstat;
-    unsigned int	utxh;
-    unsigned int	urxh;
-    unsigned int	ubrdiv;
+	unsigned int	ulcon;
+	unsigned int	ucon;
+	unsigned int	ufcon;
+	unsigned int	umcon;
+	unsigned int	utrstat;
+	unsigned int	uerstat;
+	unsigned int	ufstat;
+	unsigned int	umstat;
+	unsigned int	utxh;
+	unsigned int	urxh;
+	unsigned int	ubrdiv;
 };
 
 #endif	/* __ASSEMBLY__ */

@@ -752,6 +752,9 @@ config ARCH_S5L87XX
 	select DM_GPIO
 	select DM_SERIAL
 	imply CMD_DM
+	help
+	  Support for Samsung S5L87xx SoCs. They are used in the Apple iPod nano,
+	  iPod classic and iPod touch series. All CPU cores are 32-bit ARM.
 
 config ARCH_EXYNOS
 	bool "Samsung EXYNOS"

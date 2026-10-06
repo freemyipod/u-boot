@@ -1,7 +1,10 @@
 if S5L8740
 
 config TARGET_N31
-    bool "Apple N31 - iPod nano (7th generation)"
+	bool "Apple N31 - iPod nano (7th generation)"
+	help
+	  Apple iPod nano (7th generation) is a digital audio player, introduced in
+	  October 2012. It has a NAND flash of 16 GiB.
 
 source "board/apple/n31/Kconfig"
 
