@@ -5,3 +5,4 @@
 
 obj-y += ../nxx-common/nxx.o
 obj-y += n31.o
+obj-y += n31-lcd.o
