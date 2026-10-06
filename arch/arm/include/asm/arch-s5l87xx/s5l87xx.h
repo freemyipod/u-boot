@@ -45,18 +45,18 @@
 #define S5L87XX_SWRCON    (S5L87XX_CLK_BASE + 0x50)
 /* S5L8702 only uses PWRCON(0) and PWRCON(1) */
 #define S5L87XX_PWRCON(i) (S5L87XX_CLK_BASE + \
-                                  ((i) == 4 ? 0x6C : \
-                                  ((i) == 3 ? 0x68 : \
-                                  ((i) == 2 ? 0x58 : \
-                                  ((i) == 1 ? 0x4C : \
-                                              0x48)))))
+							((i) == 4 ? 0x6C : \
+							((i) == 3 ? 0x68 : \
+							((i) == 2 ? 0x58 : \
+							((i) == 1 ? 0x4C : \
+								0x48)))))
 #endif
 
 #define S5L87XX_TIMER_BASE 0x3C700000
 
 #define S5L87XX_WDT_BASE 0x3C800000
 #define S5L87XX_WDTCON   S5L87XX_WDT_BASE			/* Control Register */
-#define S5L87XX_WDTCNT   (S5L87XX_WDT_BASE + 0x04) 	/* 11-bits internal counter */
+#define S5L87XX_WDTCNT   (S5L87XX_WDT_BASE + 0x04)	/* 11-bits internal counter */
 
 #define S5L87XX_GPIO_BASE    0x3CF00000
 #define S5L87XX_PCON(n) (S5L87XX_GPIO_BASE + 0x00 + (n) * 0x20)
@@ -64,15 +64,16 @@
 #define S5L87XX_PUNC(n) (S5L87XX_GPIO_BASE + 0x10 + (n) * 0x20)
 #define S5L87XX_PPIE(n) (S5L87XX_GPIO_BASE + 0x14 + (n) * 0x20)
 
-#define S5L87XX_PCON_PINS_CLEAR_FN(rx_pin, tx_pin) (~(GENMASK(((rx_pin + 1) * 4) - 1, rx_pin * 4) |\
-GENMASK(((tx_pin + 1) * 4) - 1, tx_pin * 4)))
-#define S5L87XX_PCON_PINS_SET_FN(rx_pin, tx_pin, fn) ((fn << (rx_pin * 4)) | (fn << (tx_pin * 4)))
+#define S5L87XX_PCON_PINS_CLEAR_FN(rx_pin, tx_pin) (~(GENMASK((((rx_pin) + 1) * 4) - 1, \
+	(rx_pin) * 4) | GENMASK((((tx_pin) + 1) * 4) - 1, (tx_pin) * 4)))
+#define S5L87XX_PCON_PINS_SET_FN(rx_pin, tx_pin, fn) (((fn) << ((rx_pin) * 4)) |\
+	((fn) << ((tx_pin) * 4)))
 
 #define S5L87XX_BUS_BASE 0x3E000000
 
 /* Move 0xd3 value to CPSR register to enable SVC mode */
 #define svc32_mode_en() __asm__ __volatile__				\
 			("@ I&F disable, Mode: 0x13 - SVC\n\t"		\
-			 "msr     cpsr_c, %0\n\t" : : "r"(0x13|0xC0))
+			 "msr     cpsr_c, %0\n\t" : : "r"(0x13 | 0xC0))
 
 #endif //__S5L87XX_H_

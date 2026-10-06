@@ -1,15 +1,15 @@
 if TARGET_N46
 
 config SYS_BOARD
-    default "n46"
+	default "n46"
 
 config SYS_VENDOR
-    default "apple"
+	default "apple"
 
 config SYS_SOC
 	default "s5l8702"
 
 config SYS_CONFIG_NAME
-    default "apple_n46"
+	default "apple_n46"
 
 endif

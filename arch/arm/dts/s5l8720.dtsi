@@ -33,7 +33,8 @@
 					   "uart0", "usb-otg", "usb2-phy", "bootrom";
 	samsung,clock-gates = <37 128>, <55 129>, <56 130>, <57 131>, <58 132>,
 						  <59 133>, <60 134>, <69 150>, <70 151>,
-						  <41 135>, <2 0xffffffff>, <35 0xffffffff>, <13 0xffffffff>;
+						  <41 135>, <2 0xffffffff>, <35 0xffffffff>,
+						  <13 0xffffffff>;
 };
 
 &uart0 {
