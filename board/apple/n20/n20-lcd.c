@@ -30,20 +30,34 @@
 #define S5L8723_DSI_BASE			0x3d800000
 
 #define S5L8723_DSI_00			0x00
+#define S5L8723_DSI_04			0x04
 #define S5L8723_DSI_08			0x08
 #define S5L8723_DSI_10			0x10
 #define S5L8723_DSI_14			0x14
 #define S5L8723_DSI_18			0x18
+#define S5L8723_DSI_28			0x28
 #define S5L8723_DSI_2C			0x2c
+#define S5L8723_DSI_30			0x30
 #define S5L8723_DSI_WCMD			0x34
 #define S5L8723_DSI_WDATA			0x38
 #define S5L8723_DSI_3C			0x3c
+#define S5L8723_DSI_40			0x40
 #define S5L8723_DSI_STATUS			0x44
+#define S5L8723_DSI_4C			0x4C
+#define S5L8723_DSI_50			0x50
+#define S5L8723_DSI_54			0x54
+#define S5L8723_DSI_58			0x58
+#define S5L8723_DSI_7C			0x7C
 
+#define S5L8723_DSI_00_00_08			(BIT(8) | BIT(0))
+#define S5L8723_DSI_00_09				BIT(9)
 #define S5L8723_DSI_00_31				BIT(31)
 
 #define S5L8723_DSI_STATUS_READY_WCMD	BIT(22)
 #define S5L8723_DSI_STATUS_READY2		BIT(24)
+
+#define S5L8723_DSI_2C_BUSY				BIT(31)
+#define S5L8723_DSI_4C_INIT_DONE		BIT(23)
 
 #define WIDTH 240
 #define HEIGHT 240
@@ -276,6 +290,123 @@ static int lcd_read_panel(u8 reg, unsigned length, u8 *bytes)
 	return 0;
 }
 
+static int lcd_init(void)
+{
+	u32 val;
+	int result;
+
+	if (readl(S5L8723_DSI_BASE + S5L8723_DSI_4C) & S5L8723_DSI_4C_INIT_DONE) {
+		printf("%s: already done, skipping\n", __func__);
+		return 0;
+	}
+
+	if (readl(S5L8723_DSI_BASE + S5L8723_DSI_7C) < 16) {
+		printf("%s: 0x7c < 16\n", __func__);
+		return 0;
+	}
+
+	/* Dsim 0x870 / 0xde0. Cold controller, no LCDIF or panel commands. */
+	writel(0xffffffff, S5L8723_DSI_BASE + S5L8723_DSI_30);
+	writel(S5L8723_DSI_2C_BUSY, S5L8723_DSI_BASE + S5L8723_DSI_2C);
+
+	if (readl(S5L8723_DSI_BASE + S5L8723_DSI_2C) & S5L8723_DSI_2C_BUSY) {
+		printf("%s: 0x2c busy\n", __func__);
+		return 0;
+	}
+
+	writel(0x0480c6e2, S5L8723_DSI_BASE + S5L8723_DSI_4C);
+	writel(0xa25a8, S5L8723_DSI_BASE + S5L8723_DSI_50);
+
+	result = readl_poll_timeout(
+		S5L8723_DSI_BASE + S5L8723_DSI_00,
+		val,
+		(val & S5L8723_DSI_00_31),
+		50000
+	);
+
+	if (result) {
+		printf("timeout PLL wait\n");
+		return result;
+	}
+
+	result = readl_poll_timeout(
+		S5L8723_DSI_BASE + S5L8723_DSI_2C,
+		val,
+		(val & S5L8723_DSI_2C_BUSY),
+		50000
+	);
+
+	if (result) {
+		printf("timeout 0x2c busy\n");
+		return result;
+	}
+
+	writel(0x11180002, S5L8723_DSI_BASE + S5L8723_DSI_08);
+	writel(1, S5L8723_DSI_BASE + S5L8723_DSI_04);
+	mdelay(1);
+
+	writel(0, S5L8723_DSI_BASE + S5L8723_DSI_04);
+	val = readl(S5L8723_DSI_BASE + S5L8723_DSI_00);
+	writel(0xffffffff, S5L8723_DSI_BASE + S5L8723_DSI_30);
+	/* 240x240, stream enable deliberately clear */
+	writel(0x00f000f0, S5L8723_DSI_BASE + S5L8723_DSI_18);
+	writel(0x2c00, S5L8723_DSI_BASE + S5L8723_DSI_54);
+	writel(0, S5L8723_DSI_BASE + S5L8723_DSI_58);
+	writel(10, S5L8723_DSI_BASE + S5L8723_DSI_28);
+	writel(0x1ff, S5L8723_DSI_BASE + S5L8723_DSI_40);
+	writel(0x1d, S5L8723_DSI_BASE + S5L8723_DSI_STATUS);
+
+	/* Pixel-format property 6 -> switch helper target 0x8c2 -> format 7.
+	 * One lane: (7<<12) | ((1-1)<<5) | ((1<<1)*2-2) | 0x700001. */
+	writel(0x00707003, S5L8723_DSI_BASE + S5L8723_DSI_10);
+	writel(BIT(20), S5L8723_DSI_BASE + S5L8723_DSI_14);
+	mdelay(1);
+
+	val = readl(S5L8723_DSI_BASE + S5L8723_DSI_14);
+	val &= ~BIT(20);
+	writel(val, S5L8723_DSI_BASE + S5L8723_DSI_14);
+
+	if (readl(S5L8723_DSI_BASE + S5L8723_DSI_00) & S5L8723_DSI_00_09) {
+		val = readl(S5L8723_DSI_BASE + S5L8723_DSI_14);
+		val |= 0x5;
+		writel(val, S5L8723_DSI_BASE + S5L8723_DSI_14);
+
+		result = readl_poll_timeout(
+			S5L8723_DSI_BASE + S5L8723_DSI_00,
+			val,
+			!(val & S5L8723_DSI_00_09),
+			50000
+		);
+
+		if (result) {
+			printf("timeout 0x00 0x09\n");
+			return result;
+		}
+	}
+
+	result = readl_poll_timeout(
+		S5L8723_DSI_BASE + S5L8723_DSI_00,
+		val,
+		(val & S5L8723_DSI_00_00_08) == S5L8723_DSI_00_00_08,
+		50000
+	);
+
+	if (result) {
+		printf("timeout 0x00 0x101\n");
+		return result;
+	}
+
+	val = readl(S5L8723_DSI_BASE + S5L8723_DSI_14);
+	val |= 0xc0;
+	writel(val, S5L8723_DSI_BASE + S5L8723_DSI_14);
+
+	uint32_t z=0;
+	__asm__ volatile("mcr p15, 0, %0, c7, c10, 0\n"
+					 "mcr p15, 0, %0, c7, c10, 4"::"r"(z):"memory");
+
+	return 0;
+}
+
 static int lcd_wake(void)
 {
 	ensure_mask(0x39700014,			BIT(2),		false, false);	// EIC
@@ -449,8 +580,21 @@ static int lcd_draw(u32 *src)
 static int draw(struct cmd_tbl *cmdtp, int flag, int argc,
 				char *const argv[])
 {
+	int result = lcd_init();
 
-	int result = lcd_wake();
+	if (result) {
+		// cleanup
+		writel(1, S5L8723_DSI_BASE + S5L8723_DSI_04);
+		writel(0xffff, S5L8723_DSI_BASE + S5L8723_DSI_08);
+		writel(0, S5L8723_DSI_BASE + S5L8723_DSI_4C);
+		writel(S5L8723_DSI_2C_BUSY, S5L8723_DSI_BASE + S5L8723_DSI_2C);
+		writel(0, S5L8723_DSI_BASE + S5L8723_DSI_04);
+
+		printf("lcd_init: %d\n", result);
+		return result;
+	}
+
+	result = lcd_wake();
 
 	if (result) {
 		printf("lcd_wake: %d\n", result);
