@@ -302,7 +302,7 @@ static int lcd_init(void)
 
 	if (readl(S5L8723_DSI_BASE + S5L8723_DSI_7C) < 16) {
 		printf("%s: 0x7c < 16\n", __func__);
-		return 0;
+		//return 0;
 	}
 
 	/* Dsim 0x870 / 0xde0. Cold controller, no LCDIF or panel commands. */
@@ -316,7 +316,7 @@ static int lcd_init(void)
 
 	writel(0x0480c6e2, S5L8723_DSI_BASE + S5L8723_DSI_4C);
 	writel(0xa25a8, S5L8723_DSI_BASE + S5L8723_DSI_50);
-
+/*
 	result = readl_poll_timeout(
 		S5L8723_DSI_BASE + S5L8723_DSI_00,
 		val,
@@ -340,6 +340,7 @@ static int lcd_init(void)
 		printf("timeout 0x2c busy\n");
 		return result;
 	}
+	*/
 
 	writel(0x11180002, S5L8723_DSI_BASE + S5L8723_DSI_08);
 	writel(1, S5L8723_DSI_BASE + S5L8723_DSI_04);
@@ -383,7 +384,7 @@ static int lcd_init(void)
 			return result;
 		}
 	}
-
+/*
 	result = readl_poll_timeout(
 		S5L8723_DSI_BASE + S5L8723_DSI_00,
 		val,
@@ -395,7 +396,7 @@ static int lcd_init(void)
 		printf("timeout 0x00 0x101\n");
 		return result;
 	}
-
+*/
 	val = readl(S5L8723_DSI_BASE + S5L8723_DSI_14);
 	val |= 0xc0;
 	writel(val, S5L8723_DSI_BASE + S5L8723_DSI_14);
@@ -431,14 +432,14 @@ static int lcd_wake(void)
 	}
 
 	mdelay(120);
-
+/*
 	u8 power;
 	if (lcd_read_panel(0x0a, 1, &power))
 		return 1;
 
 	if (!(power & 0x10))
 		return 2;
-
+*/
 	// if f4 changed write it back
 
 	if (lcd_key(0xa5))
@@ -448,13 +449,13 @@ static int lcd_wake(void)
 		return 4;
 
 	mdelay(34);
-
+/*
 	if (lcd_read_panel(0x0a, 1, &power))
 		return 5;
 
 	if ((power & 0x14) != 0x14)
 		return 6;
-
+*/
 	// pmic write turn on light
 
 	return 0;
