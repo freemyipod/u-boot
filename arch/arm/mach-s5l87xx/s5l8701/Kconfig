@@ -1,10 +1,15 @@
 if S5L8701
 
+choice
+	prompt "S5L8701 board select"
+
 config TARGET_N36
 	bool "Apple N36 - iPod nano (2nd generation)"
 	help
 	  Apple iPod nano (2nd generation) is a digital audio player, introduced in
 	  September 2006. It has a NAND flash of either 2, 4 or 8 GiB.
+
+endchoice
 
 source "board/apple/n36/Kconfig"
 

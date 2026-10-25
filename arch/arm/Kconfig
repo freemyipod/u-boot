@@ -747,7 +747,7 @@ config TARGET_BCMNS3
 	  applications.
 
 config ARCH_S5L87XX
-	bool "Samsung S5L87XX"
+	bool "Samsung S5L87xx"
 	select DM
 	select DM_GPIO
 	select DM_SERIAL

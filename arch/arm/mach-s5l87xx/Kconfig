@@ -1,5 +1,8 @@
 if ARCH_S5L87XX
 
+choice
+	prompt "S5L87xx SoC select"
+
 config S5L8701
 	bool "S5L8701"
 	# Actually an ARM940T
@@ -42,6 +45,8 @@ config S5L8740
 	help
 	  The Samsung S5L8740 is an ARM-based SoC with a single core ARM Cortex A5.
 	  Peripherals include USB2 device, USB1.1 OTG, I2C, I2S, UART and SPI.
+
+endchoice
 
 source "arch/arm/mach-s5l87xx/s5l8701/Kconfig"
 source "arch/arm/mach-s5l87xx/s5l8702/Kconfig"

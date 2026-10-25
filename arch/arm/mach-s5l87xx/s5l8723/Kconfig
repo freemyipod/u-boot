@@ -1,10 +1,15 @@
 if S5L8723
 
+choice
+	prompt "S5L8723 board select"
+
 config TARGET_N20
 	bool "Apple N20 - iPod nano (6th generation)"
 	help
 	  Apple iPod nano (6th generation) is a digital audio player, introduced in
 	  September 2010. It has a NAND flash of either 8 or 16 GiB.
+
+endchoice
 
 source "board/apple/n20/Kconfig"
 
