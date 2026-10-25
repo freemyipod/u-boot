@@ -4,7 +4,7 @@
  */
 
 #include <init.h>
-#include <asm/arch-s5l87xx/s5l87xx-clk.h>
+#include <asm/arch-s5l87xx/clk.h>
 #include <asm/arch/lcdcon.h>
 
 enum n46_lcd_type {

@@ -6,7 +6,7 @@
 #include <init.h>
 #include <asm/io.h>
 #include <asm/arch-s5l87xx/s5l87xx.h>
-#include <asm/arch-s5l87xx/s5l87xx-clk.h>
+#include <asm/arch-s5l87xx/clk.h>
 
 // S5L8702 OTG PHY register layout, reverse-engineered from a disk mode QEMU
 // trace. Differs from the S5L8730/N36 layout, so it is kept separate.

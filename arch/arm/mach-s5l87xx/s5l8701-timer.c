@@ -6,7 +6,7 @@
 #include <init.h>
 #include <asm/io.h>
 #include <asm/arch-s5l87xx/s5l87xx.h>
-#include <asm/arch-s5l87xx/s5l87xx-clk.h>
+#include <asm/arch-s5l87xx/clk.h>
 
 struct s5l87xx_timer {
 	u32 con;	// 0x00

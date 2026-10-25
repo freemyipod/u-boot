@@ -6,7 +6,7 @@
 #include <init.h>
 #include <asm/io.h>
 #include <asm/arch-s5l87xx/s5l87xx.h>
-#include <asm/arch-s5l87xx/s5l87xx-clk.h>
+#include <asm/arch-s5l87xx/clk.h>
 #include <linux/delay.h>
 
 struct s5l87xx_otgphy {

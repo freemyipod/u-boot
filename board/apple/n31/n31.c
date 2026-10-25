@@ -5,7 +5,7 @@
 
 #include <asm/io.h>
 #include <asm/arch-s5l87xx/s5l87xx.h>
-#include <asm/arch-s5l87xx/s5l87xx-clk.h>
+#include <asm/arch-s5l87xx/clk.h>
 
 static void board_gpio_init(void)
 {

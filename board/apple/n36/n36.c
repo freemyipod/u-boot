@@ -3,7 +3,7 @@
  * Copyright (C) 2026 The freemyipod team (freemyipod.org)
  */
 
-#include <asm/arch-s5l87xx/s5l87xx-clk.h>
+#include <asm/arch-s5l87xx/clk.h>
 
 static void board_clock_init(void)
 {
