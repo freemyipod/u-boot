@@ -16,7 +16,11 @@
 #if !IS_ENABLED(CONFIG_ARCH_APPLE) && !IS_ENABLED(CONFIG_ARCH_S5L87XX)
 #include <asm/arch/clk.h>
 #endif
+#if IS_ENABLED(CONFIG_ARCH_S5L87XX)
+#include <asm/arch-s5l87xx/uart.h>
+#else
 #include <asm/arch/uart.h>
+#endif
 #include <serial.h>
 #include <clk.h>
 

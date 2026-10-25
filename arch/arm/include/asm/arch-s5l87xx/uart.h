@@ -5,8 +5,8 @@
  * Heungjun Kim <riverful.kim@samsung.com>
  */
 
-#ifndef __ASM_ARCH_UART_H_
-#define __ASM_ARCH_UART_H_
+#ifndef __ASM_ARCH_S5L87XX_UART_H_
+#define __ASM_ARCH_S5L87XX_UART_H_
 
 #ifndef __ASSEMBLY__
 
@@ -26,4 +26,4 @@ struct s5p_uart {
 
 #endif	/* __ASSEMBLY__ */
 
-#endif
+#endif	/* __ASM_ARCH_S5L87XX_UART_H_ */
