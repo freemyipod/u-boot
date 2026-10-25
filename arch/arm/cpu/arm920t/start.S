@@ -134,8 +134,7 @@ cpu_init_crit:
 
 #if CONFIG_POSITION_INDEPENDENT
 _rel_dyn_start_ofs:
-    .word   __rel_dyn_start - pie_fixup
+	.word   __rel_dyn_start - pie_fixup
 _rel_dyn_end_ofs:
-    .word   __rel_dyn_end - pie_fixup
+	.word   __rel_dyn_end - pie_fixup
 #endif
-
