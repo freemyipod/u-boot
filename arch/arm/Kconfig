@@ -2430,6 +2430,8 @@ source "arch/arm/mach-qemu/Kconfig"
 
 source "arch/arm/mach-rockchip/Kconfig"
 
+source "arch/arm/mach-s5l87xx/Kconfig"
+
 source "arch/arm/mach-s5pc1xx/Kconfig"
 
 source "arch/arm/mach-sc5xx/Kconfig"
