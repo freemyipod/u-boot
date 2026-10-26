@@ -29,3 +29,7 @@ obj-$(CONFIG_S5L8730) += relocate.o
 obj-$(CONFIG_S5L8730) += s5l8730.o
 obj-$(CONFIG_S5L8730) += s5l87xx-otg-phy.o
 obj-$(CONFIG_S5L8730) += s5l87xx-timer.o
+
+obj-$(CONFIG_S5L8740) += s5l8740.o
+obj-$(CONFIG_S5L8740) += s5l8740-otg-phy.o
+obj-$(CONFIG_S5L8740) += s5l87xx-timer.o
