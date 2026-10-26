@@ -91,6 +91,7 @@ pie_fixup_done:
  *
  *************************************************************************
  */
+#if !CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT)
 	/*
 	 * we do sys-critical inits only at reboot,
 	 * not when booting from ram!
@@ -136,7 +137,10 @@ mmu_disable_phys:
 	/*
 	 * Go setup Memory and board specific bits prior to relocation.
 	 */
+#if !CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT_ONLY)
 	bl	lowlevel_init		/* go setup pll,mux,memory */
+#endif /* CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT_ONLY) */
+#endif /* CONFIG_IS_ENABLED(SKIP_LOWLEVEL_INIT) */
 
 	bl	_main
 
