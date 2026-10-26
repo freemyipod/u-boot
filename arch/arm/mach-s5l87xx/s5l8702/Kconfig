@@ -1,0 +1,26 @@
+if S5L8702
+
+choice
+	prompt "S5L8702 board select"
+	help
+	  Choose which S5L8702 board are you building for. Currently only N46 (iPod
+	  nano 3rd generation) and N25 (iPod classic 6th generation) are supported.
+
+config TARGET_N46
+	bool "Apple N46 - iPod nano (3rd generation)"
+	help
+	  Apple iPod nano (3rd generation) is a digital audio player, introduced in
+	  September 2007. It has a NAND flash of either 4 or 8 GiB.
+
+config TARGET_N25
+	bool "Apple N25 - iPod classic (6th generation)"
+	help
+	  Apple iPod classic (6th generation) is a digital audio player, introduced
+	  in September 2007. It has a HDD of either 80, 120 or 160 GiB.
+
+endchoice
+
+source "board/apple/n46/Kconfig"
+source "board/apple/n25/Kconfig"
+
+endif
