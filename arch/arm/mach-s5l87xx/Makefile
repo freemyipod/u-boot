@@ -5,3 +5,7 @@
 
 obj-y += s5l87xx.o
 obj-y += s5l87xx-clk.o
+
+obj-$(CONFIG_S5L8701) += s5l8701.o
+obj-$(CONFIG_S5L8701) += s5l8701-otg-phy.o
+obj-$(CONFIG_S5L8701) += s5l8701-timer.o
