@@ -287,6 +287,14 @@ int usb_gadget_register_driver(struct usb_gadget_driver *driver)
 
 	enable_irq(IRQ_OTG);
 
+	if (IS_ENABLED(CONFIG_S5L8701)) {
+		u32 value;
+
+		value = readl(S5L87XX_INTMSK);
+		value |= 1 << IRQ_USB_FUNC;
+		writel(value, S5L87XX_INTMSK);
+	}
+
 	debug_cond(DEBUG_SETUP != 0,
 		   "Registered gadget driver %s\n", dev->gadget.name);
 	udc_enable(dev);
@@ -315,6 +323,14 @@ int usb_gadget_unregister_driver(struct usb_gadget_driver *driver)
 	driver->unbind(&dev->gadget);
 
 	disable_irq(IRQ_OTG);
+
+	if (IS_ENABLED(CONFIG_S5L8701)) {
+		u32 value;
+
+		value = readl(S5L87XX_INTMSK);
+		value &= ~(1 << IRQ_USB_FUNC);
+		writel(value, S5L87XX_INTMSK);
+	}
 
 	udc_disable(dev);
 	return 0;
