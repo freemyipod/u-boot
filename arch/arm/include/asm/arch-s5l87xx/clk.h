@@ -1,0 +1,19 @@
+/* SPDX-License-Identifier: GPL-2.0+ */
+/*
+ * Copyright (C) 2026 The freemyipod team (freemyipod.org)
+ */
+
+#ifndef __S5L87XX_CLK_H_
+#define __S5L87XX_CLK_H_
+
+#include <inttypes.h>
+
+/*
+ * Ungate a single clock gate by raw {gate, bit}. Unlike s5l87xx_enable_clkgate()
+ * this needs no device tree, so it is safe in pre-relocation paths (e.g. the
+ * debug UART init, which runs before the FDT is set up).
+ */
+void s5l87xx_enable_clkgate_bit(u8 gate, u8 bit);
+void s5l87xx_enable_clkgate(const char *id);
+
+#endif //__S5L87XX_CLK_H_
