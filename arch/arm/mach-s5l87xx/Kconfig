@@ -58,5 +58,6 @@ config S5L8740
 endchoice
 
 source "arch/arm/mach-s5l87xx/s5l8701/Kconfig"
+source "arch/arm/mach-s5l87xx/s5l8702/Kconfig"
 
 endif
