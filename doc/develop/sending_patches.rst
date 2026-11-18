@@ -184,6 +184,20 @@ General Patch Submission Rules
   cases, you did something wrong if your patch exceeds this limit. Think again
   if you should not split it into separate logical parts.
 
+* If sending patches through your mail server is broken, doesn't work at all or
+  is not possible, consider using `b4's web endpoint <b4-web-endpoint-link_>`_.
+  It will allow you to send patches without using your mail server. A notable
+  example is `Amazon Web Services' Simple E-mail Service (AWS SES)
+  <aws-ses-sendrawemail-message-id-link_>`_. It modifies the Message-ID header
+  and your individual patches don't point back to the cover letter and vice
+  versa.
+
+.. _aws-ses-sendrawemail-message-id-link:
+   https://docs.aws.amazon.com/ses/latest/APIReference/API_SendRawEmail.html#:~:text=Amazon%20SES%20automatically%20applies%20its%20own%20Message%2DID
+
+.. _b4-web-endpoint-link:
+   https://b4.docs.kernel.org/en/latest/contributor/send.html#authenticating-with-the-web-submission-endpoint
+
 Attributing Code, Copyrights, Signing
 -------------------------------------
 
